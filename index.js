@@ -1132,21 +1132,6 @@ let decimals
 let symbol
 
 
-async function initialize(web3) {
-  await ethereum.enable()
-  let provider = new ethers.providers.Web3Provider(web3.currentProvider)
-  let accounts = await provider.listAccounts()
-  signer = provider.getSigner(accounts[0])
-
-  ubc = new ethers.Contract(ubcAddress,ubcABI,signer)
-  devcash = new ethers.Contract(devcashAddress,devcashABI,signer)
-
-
-  decimals = await devcash.decimals()
-  symbol = await devcash.symbol()
-
-}
-
 async function getETHBalance(){
 	let balance = await signer.getBalance()
 	console.log(balance)
@@ -1168,7 +1153,6 @@ async function getDevcashBalance(){
 	console.log(balance)
 	return(balance)
 }
-
 async function getApprovedBalance(){
 	let approved = await devcash.allowance(signer._address, ubcAddress)
 	console.log(approved)
@@ -1178,9 +1162,13 @@ async function getApprovedBalance(){
 	console.log(approved)
 	return(approved)
 }
-
+async function approveDevcash(amount) {
+  amount = ethers.utils.parseUnits(amount.toString(), decimals)
+  await devcash.approve(ubcAddress,amount)
+}
 async function getUbountiesInfo(){
 	ubountiesInfo = new Array()
+
 	let numUbounties = await ubc.numUbounties()
 	for(i=0;i<numUbounties;i++){
 		let ubounty = await ubc.ubounties(i)
@@ -1189,9 +1177,7 @@ async function getUbountiesInfo(){
 		for(j=0;j<numSubmissions;j++){
 			let submission = await getSubmission(i,j)
 			let revisions = new Array()
-			console.log(submission)
 			let numRevisions = submission[3]
-			console.log(numRevisions)
 			for (k=0;k<numRevisions;k++){
 				let revision = await getRevision(i,j,k)
 				revisions.push(revision)
@@ -1201,26 +1187,36 @@ async function getUbountiesInfo(){
 
 		}
 		ubounty.submissions=submissions
+		let bountyAmount = await devcash.balanceOf(getBountyChest(ubounty.bountyChestIndex))
+		bountyAmount = bountyAmount.div(ubounty.available)
+		ubounty.amount = ethers.utils.formatUnits(bountyAmount,decimals)
 		ubountiesInfo.push(ubounty)
 
 	}
 	return(ubountiesInfo)
 }
 
-
-
-async function approveDevcash(amount) {
-  amount = ethers.utils.parseUnits(amount.toString(), decimals)
-  await devcash.approve(ubcAddress,amount)
-}
-
 async function numBountyChests(){
 	return(await ubc.numBC())
 }
-
+async function getBountyChest(bcIndex){
+	return(await ubc.bCList(bcIndex))
+}
 async function numUsers() {
 	return(await ubc.numUsers())
 }
+async function getUsers() {
+	let num = await numUsers()
+	let users = new Array()
+	for (i=0;i<num;i++){
+		users.push(await ubc.userList(i));
+	}
+	return(users)
+}
+
+
+
+
 //n = Name
 //d = description
 //av = bounties available
@@ -1249,10 +1245,8 @@ async function award(uI,hunter){
 async function submit(uI,sS){
 	await ubc.submit(uI,sS)
 }
-
 //sI = submissionIndex
 //rS = revisionString
-
 async function revise(uI,sI,rS) {
 	await ubc.revise(uI,sI,rS)
 }
@@ -1260,23 +1254,18 @@ async function revise(uI,sI,rS) {
 async function approve(uI,sI,f) {
 	await ubc.approve(uI,sI,f)
 }
-
 async function reject(uI,sI,f) {
 	await ubc.reject(uI,sI,f)
 }
-
 async function requestRevision(uI,sI,f) {
 	await ubc.requestRevision(uI,sI,f)
 }
-
 async function bountyAmount(uI){
  return await ubc.bountyAmount(uI)
 }
-
 async function reclaim(uI) {
 	await ubc.reclaim(uI)
 }
-
 async function createBountyChest(){
 	await ubc.createBountyChest()
 }
@@ -1284,8 +1273,6 @@ async function createBountyChest(){
 //bountyAmount
 //reclaim
 //createBountyChest
-
-
 async function getSubmission(uI,sI) {
 	return(await ubc.getSubmission(uI,sI))
 }
@@ -1293,7 +1280,6 @@ async function getSubmission(uI,sI) {
 async function getRevision(uI,sI,rI) {
 	return(await ubc.getRevision(uI,sI,rI))
 }
-
 // async function award(){
 // 	let hunter = document.getElementById("bountyHunter").value;
 // 	let name = document.getElementById("bountyName").value;

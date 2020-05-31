@@ -5,12 +5,159 @@
             src="https://cdn.ethers.io/scripts/ethers-v4.min.js"
             type="text/javascript">
     </script>
+    <script src="index.js"></script>
+    <script src="frontend.js"></script>
     <meta charset="utf-8">
     <title></title>
   </head>
   <body>
 
-    <script src="index.js"></script>
+
+
+
+
+    <h1>Balances</h1>
+    <label id="ETHBalanceLabel">Eth Balance: </label><br>
+    <label id="DBalanceLabel">Devcash Balance: </label><br>
+    <label id="DApprovedLabel">Approved: </label><br><br>
+
+    <input id="DApproveAmountInput" placeholder = "amount..."></input><button onclick="fApproveDevcash()">Approve</button><br><br>
+    <hr>
+
+<h1>Bounty Poster</h1>
+  <h3> Post Open Bounty</h3>
+
+  <label>Fee: 10k Devcash. All fees recycled into the pre-IBO</label> <br> <br>
+
+<input id="OBNameInput" placeholder="name..."></input> <br>
+<input id="OBDescriptionInput" placeholder="description..."></input> <br>
+<input id="OBAvailableInput" type="number" placeholder="number of bounties..."></input> <br>
+<input id="OBAmountInput" placeholder="bounty amount..."></input> <br>
+<input id="OBTimeIntervalInput" placeholder="deadline..." ></input>
+<select id="OBTimeFrameSelect">
+  <option value="1">seconds</option>
+  <option value="60">minutes</option>
+  <option value="3600">hours</option>
+  <option value="86400">days</option>
+  <option value="604600">weeks</option>
+</select> <br>
+<button onclick = "fPostOpenBounty()">Post</button>
+
+<hr>
+<h3> Post Personal Bounty </h3>
+<label>Fee: 10k Devcash. All fees recycled into the pre-IBO</label> <br> <br>
+
+<input id="PBHunterInput" placeholder="bounty hunter..."></input> <br>
+<input id="PBNameInput" placeholder="name..."></input> <br>
+<input id="PBDescriptionInput" placeholder="description..."></input> <br>
+<input id="PBAvailableInput" type="number" placeholder="number of bounties..."></input> <br>
+<input id="PBAmountInput" placeholder="bounty amount..."></input> <br>
+<input id="PBTimeIntervalInput" placeholder="deadline..." ></input>
+<select id="PBTimeFrameSelect">
+<option value="1">seconds</option>
+<option value="60">minutes</option>
+<option value="3600">hours</option>
+<option value="86400">days</option>
+<option value="604600">weeks</option>
+</select> <br>
+<button onclick = "fPostPersonalBounty()">Post</button>
+<hr>
+
+
+<h3>Award Bounty Directly</h3>
+<input id="ABHunterInput" placeholder="bounty hunter..."></input> <br>
+<input id="ABNameInput" placeholder="bounty name..."></input> <br>
+<input id="ABDescriptionInput" placeholder="description..."></input> <br>
+<input id="ABAmountInput" placeholder="bounty amount..."></input> <br>
+<br>
+<button onclick = "award()">Award</button>
+
+<hr>
+
+<h3> Manage </h3>
+
+<select id="MBountySelect" onchange="updateCreatorManager()">
+
+</select>
+<br><br>
+
+<h6> BOUNTIES </h6>
+
+
+
+
+
+<label id="MCreatorLabel">Creator:</label> <br>
+<label id="MNameLabel">Name:</label> <br>
+<label id="MDescriptionLabel">Description:</label> <br>
+<label id="MHunterLabel">Hunter:</label> <br>
+<label id="MAmountLabel">Amount:</label> <br>
+<label id="MAvailableLabel">Num Bounties:</label> <br>
+<label id="MDeadlineLabel">Deadline:</label> <br>
+<input placeholder="amount..." id="CAmountInput"></input><button onclick="contribute()">Contribute</button> <br><br><br>
+
+<h6> SUBMISSIONS </h6>
+
+<select id="MSSubmissionSelect" onchange="updateSubmissionManager()"></select><br>
+<label id="MSHunterLabel">Hunter:</label> <br>
+<label id="MSSubmissionLabel">Submission:</label> <br>
+<button onclick="reward()">Approve:</button> <br>
+
+<hr>
+<h1>Bounty Hunter</h1>
+
+<h3> Open Bounties </h3>
+
+<table>
+  <thead>
+    <th>Creator</th>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Amount</th>
+    <th>Deadline</th>
+    <th>Submission</th>
+    <th>Submit</th>
+  </thead>
+  <tbody id="OHTable">
+  </tbody>
+</table>
+<hr>
+<h3>Personal Bounties</h3>
+<table>
+  <thead>
+    <th>Creator</th>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Amount</th>
+    <th>Deadline</th>
+    <th>Submission</th>
+    <th>Submit</th>
+  </thead>
+  <tbody id="PHTable">
+  </tbody>
+</table>
+<hr></hr>
+<h3>Submissions</h3>
+<table>
+  <thead>
+    <th>Creator</th>
+    <th>Name</th>
+    <th>Amount</th>
+    <th>Submission</th>
+    <th>Status</th>
+    <th>Deadline</th>
+    <th>Revise</th>
+  </thead>
+  <tbody id="HSTable">
+  </tbody>
+</table>
+
+<br><br>
+
+
+
+
+
     <script>
       initialize(web3)
     </script>
