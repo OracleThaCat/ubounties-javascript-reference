@@ -1214,9 +1214,6 @@ async function getUsers() {
 	return(users)
 }
 
-
-
-
 //n = Name
 //d = description
 //av = bounties available

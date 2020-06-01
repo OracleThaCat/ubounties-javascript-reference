@@ -69,6 +69,7 @@ async function populateFrontend(){
   await populateBalance()
   await populatePosterManager()
   await populateHunterManager()
+  await populateManagerManager()
 }
 
 async function getElements(){
@@ -118,156 +119,16 @@ async function getElements(){
 }
 
 async function populateBalance(){
+  console.log("Populate Balance")
   ETHBalanceLabel.innerHTML = "Eth Balance: " + await getETHBalance()
   DBalanceLabel.innerHTML = "Devcash Balance: " + await getDevcashBalance()
   DApprovedLabel.innerHTML = "Approved Devcash: " + await getApprovedBalance()
 }
 
-async function populatePosterManager(){
-  console.log("populate Poster Manager")
-  await populateCreatorSelect()
-  var bountyId = document.getElementById("MBountySelect").value
-  if (bountyId==""){return}
-
-  let creatorLink = document.createElement("a")
-  MCreatorLabel.innerHTML = "Creator: "
-  let creatorAddress = users[ubounties[bountyId].creatorIndex]
-  creatorLink.innerText = creatorAddress
-  creatorLink.href = "https://etherscan.io/address/" + creatorAddress
-  MCreatorLabel.appendChild(creatorLink)
-  MNameLabel.innerHTML = "Name: " + ubounties[bountyId].name
-  MDescriptionLabel.innerHTML = "Description: " + ubounties[bountyId].description
-  MHunterLabel.innerHTML = "Hunter: " + users[ubounties[bountyId].hunter]
-  MAmountLabel.innerHTML = "Amount: " + ubounties[bountyId].amount + " " + symbol
-  MAvailableLabel.innerHTML = "Available: " + ubounties[bountyId].available
-  //document.getElementById("submissionLabel").innerHTML = "Submission: " + ubounties[bountyId].submissionStrings[ubounties[bountyId].numSubmissions-1]
-  MDeadlineLabel.innerHTML = "Deadline: none"
-
-  populateSubmissionsSelect(bountyId);
-  updateSubmissionManager(bountyId)
-}
-
-async function populateCreatorSelect(){
-  console.log("Populate Manager")
-  for (let j = 0; j<ubounties.length;j++){
-    if(users[ubounties[j].creatorIndex]==signer._address && ubounties[j].numLeft!=0){
-      var opt = document.createElement("option");
-      console.log(j)
-     opt.value= j;
-     opt.innerHTML = j; // whatever property it has
-
-     // then append it to the select element
-     document.getElementById("MBountySelect").appendChild(opt);
-   }
- }
-}
-
-function populateSubmissionsSelect(bountyId) {
-  console.log("populateSubmissionsSelect")
-  let submissions = ubounties[bountyId].submissions;
-  let numSubmissions = ubounties[bountyId].numSubmissions;
-  for (let j = 0;j<numSubmissions;j++){
-    let s = submissions[j]
-
-      let submitter = s.submitter;
-      let submission = s.submission
-
-      var opt = document.createElement("option");
-      opt.value= j;
-      opt.innerHTML = j; // whatever property it has
-
-      // then append it to the select element
-      MSSubmissionSelect.appendChild(opt);
-
-    console.log(j)
-  }
-}
-
-function updateSubmissionManager(){
-  var bountyId = MBountySelect.value
-  if(ubounties[bountyId].numSubmissions==0){return}
-  var submissionId = MSSubmissionSelect.value
-  console.log(bountyId)
-  console.log(submissionId)
-  MSHunterLabel.innerHTML = "Hunter: " + ubounties[bountyId].submissions[submissionId].submitter
-  MSSubmissionLabel.innerHTML = "Submission: " + ubounties[bountyId].submissions[submissionId].submissionString
-}
 
 
-function populateHunterManager() {
-  console.log("Populate Hunter Manager")
-  OHTable.innerHTML = ""
-  PHTable.innerHTML = ""
-  for (let j = 0; j<ubounties.length;j++){
-    if(ubounties[j].available>0){
-      console.log(j)
 
-      let row=document.createElement("tr");
-      cell1 = document.createElement("td");
-      cell2 = document.createElement("td");
-      cell3 = document.createElement("td");
-      cell4 = document.createElement("td");
-      cell5 = document.createElement("td");
-      cell6 = document.createElement("td");
-      cell7 = document.createElement("td");
 
-      let creator = users[ubounties[j].creatorIndex]
-      let name = ubounties[j].name
-      let description = ubounties[j].description
-      console.log(ubounties[j].bountyChestIndex)
-      let amount = ubounties[j].amount
-      let deadline = "none"
-
-      let submissionInput = document.createElement("input")
-      submissionInput.placeholder = "submission..."
-
-      let submitButton = document.createElement("input")
-      submitButton.type="button"
-      submitButton.value = "submit"
-      submitButton.onclick = function () {
-                submitString(j-1,submissionInput.value)
-            };
-
-           textnode1=document.createTextNode(creator);
-           textnode2=document.createTextNode(name);
-           textnode3=document.createTextNode(description);
-           textnode4=document.createTextNode(amount)
-           textnode5=document.createTextNode(deadline);
-
-           cell1.appendChild(textnode1);
-           cell2.appendChild(textnode2);
-           cell3.appendChild(textnode3);
-           cell4.appendChild(textnode4);
-           cell5.appendChild(textnode5);
-           cell6.appendChild(submissionInput);
-           cell7.appendChild(submitButton);
-
-          //  console.log(textnode1);
-          // console.log(textnode2);
-          //  console.log(textnode3);
-          //  console.log(amount);
-          //  console.log(textnode5);
-          //  console.log(textnode6);
-          //  console.log(submissionInput);
-          //  console.log(submitButton);
-
-           row.appendChild(cell1);
-           row.appendChild(cell2);
-           row.appendChild(cell3);
-           row.appendChild(cell4);
-           row.appendChild(cell5);
-           row.appendChild(cell6);
-           row.appendChild(cell7);
-
-           console.log(row)
-          if(ubounties[j].hunterIndex==0){
-           OHTable.appendChild(row);
-         }else if(users[ubounties[j].hunterIndex] == signer._address){
-           PHTable.appendChild(row);
-         }
-    }
-  }
-}
 //
 // function populateCreatorSelect(){
 //   console.log("populateCreatorSelect Multi")

@@ -7,12 +7,16 @@
     </script>
     <script src="index.js"></script>
     <script src="frontend.js"></script>
+    <script src="PosterManager.js"></script>
+    <script src="HunterManager.js"></script>
+    <script src="ManagerManager.js"></script>
+
     <meta charset="utf-8">
     <title></title>
   </head>
   <body>
 
-
+      <h1>Antoine's uBounties dApp</h1>
 
 
 
@@ -74,39 +78,12 @@
 
 <hr>
 
-<h3> Manage </h3>
-
-<select id="MBountySelect" onchange="updateCreatorManager()">
-
-</select>
-<br><br>
-
-<h6> BOUNTIES </h6>
 
 
-
-
-
-<label id="MCreatorLabel">Creator:</label> <br>
-<label id="MNameLabel">Name:</label> <br>
-<label id="MDescriptionLabel">Description:</label> <br>
-<label id="MHunterLabel">Hunter:</label> <br>
-<label id="MAmountLabel">Amount:</label> <br>
-<label id="MAvailableLabel">Num Bounties:</label> <br>
-<label id="MDeadlineLabel">Deadline:</label> <br>
-<input placeholder="amount..." id="CAmountInput"></input><button onclick="contribute()">Contribute</button> <br><br><br>
-
-<h6> SUBMISSIONS </h6>
-
-<select id="MSSubmissionSelect" onchange="updateSubmissionManager()"></select><br>
-<label id="MSHunterLabel">Hunter:</label> <br>
-<label id="MSSubmissionLabel">Submission:</label> <br>
-<button onclick="reward()">Approve:</button> <br>
-
-<hr>
 <h1>Bounty Hunter</h1>
 
-<h3> Open Bounties </h3>
+
+<h3> Available Open Bounties </h3>
 
 <table>
   <thead>
@@ -122,7 +99,7 @@
   </tbody>
 </table>
 <hr>
-<h3>Personal Bounties</h3>
+<h3>Available Personal Bounties</h3>
 <table>
   <thead>
     <th>Creator</th>
@@ -151,6 +128,34 @@
   <tbody id="HSTable">
   </tbody>
 </table>
+
+<h1>Bounty Manager</h1>
+
+<h3> Manage </h3>
+
+<select id="MBountySelect" onchange="updateSubmissionManager()">
+
+</select>
+<br><br>
+
+<h6> BOUNTIES </h6>
+
+<label id="MCreatorLabel">Creator:</label> <br>
+<label id="MNameLabel">Name:</label> <br>
+<label id="MDescriptionLabel">Description:</label> <br>
+<label id="MHunterLabel">Hunter:</label> <br>
+<label id="MAmountLabel">Amount:</label> <br>
+<label id="MAvailableLabel">Num Bounties:</label> <br>
+<label id="MDeadlineLabel">Deadline:</label> <br>
+<input placeholder="amount..." id="CAmountInput"></input><button onclick="contribute()">Contribute</button> <br><br><br>
+<hr>
+<h6> SUBMISSIONS </h6>
+
+<select id="MSSubmissionSelect" onchange="updateSubmissionManager()"></select><br>
+<label id="MSHunterLabel">Hunter:</label> <br>
+<label id="MSSubmissionLabel">Submission:</label> <br>
+<button onclick="reward()">Approve:</button> <br>
+
 
 <br><br>
 
