@@ -1,20 +1,17 @@
 async function populatePosterManager(){
   console.log("populate Poster Manager")
   await populateCreatorSelect()
-  var bountyId = document.getElementById("MBountySelect").value
-  if (bountyId==""){return}
+}
+async function populateCreatorSelect(){
+  console.log("Populate Poster Select")
 
-  let creatorLink = document.createElement("a")
-  MCreatorLabel.innerHTML = "Creator: "
-  let creatorAddress = users[ubounties[bountyId].creatorIndex]
-  creatorLink.innerText = creatorAddress
-  creatorLink.href = "https://etherscan.io/address/" + creatorAddress
-  MCreatorLabel.appendChild(creatorLink)
-  MNameLabel.innerHTML = "Name: " + ubounties[bountyId].name
-  MDescriptionLabel.innerHTML = "Description: " + ubounties[bountyId].description
-  MHunterLabel.innerHTML = "Hunter: " + users[ubounties[bountyId].hunter]
-  MAmountLabel.innerHTML = "Amount: " + ubounties[bountyId].amount + " " + symbol
-  MAvailableLabel.innerHTML = "Available: " + ubounties[bountyId].available
-  //document.getElementById("submissionLabel").innerHTML = "Submission: " + ubounties[bountyId].submissionStrings[ubounties[bountyId].numSubmissions-1]
-  MDeadlineLabel.innerHTML = "Deadline: none"
+  for (let j = 0; j<ubounties.length;j++){
+    if(users[ubounties[j].creatorIndex]==signer._address && ubounties[j].numLeft!=0){
+      var opt = document.createElement("option");
+      console.log(j)
+     opt.value= j;
+     opt.innerHTML = j;
+     MBountySelect.appendChild(opt);
+   }
+ }
 }

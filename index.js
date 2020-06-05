@@ -1,3 +1,10 @@
+//TODO:
+//make sure deadlines working properly
+//gather all event logs
+//update statuses
+//refactor code, make neater, make consistent
+//make submissions update when you select new bounty
+
 const ubcABI = [
 	{
 		"constant": false,
@@ -1134,32 +1141,24 @@ let symbol
 
 async function getETHBalance(){
 	let balance = await signer.getBalance()
-	console.log(balance)
-
 	balance = ethers.utils.formatEther(balance)
-
 	balance = ethers.utils.commify(balance)
 	balance += " ETH"
-	console.log(balance)
 	return(balance)
 }
 async function getDevcashBalance(){
 
   let balance = await devcash.balanceOf(signer._address)
-	console.log(balance)
 	balance = ethers.utils.formatUnits(balance,decimals)
 	balance = ethers.utils.commify(balance)
 	balance += " " + symbol
-	console.log(balance)
 	return(balance)
 }
 async function getApprovedBalance(){
 	let approved = await devcash.allowance(signer._address, ubcAddress)
-	console.log(approved)
 	approved = ethers.utils.formatUnits(approved,decimals)
 	approved = ethers.utils.commify(approved)
 	approved += " " + symbol
-	console.log(approved)
 	return(approved)
 }
 async function approveDevcash(amount) {
@@ -1188,7 +1187,11 @@ async function getUbountiesInfo(){
 		}
 		ubounty.submissions=submissions
 		let bountyAmount = await devcash.balanceOf(getBountyChest(ubounty.bountyChestIndex))
-		bountyAmount = bountyAmount.div(ubounty.available)
+		if(ubounty.available>0){
+			bountyAmount = bountyAmount.div(ubounty.available)
+		} else {
+			bountyAmount = 0
+		}
 		ubounty.amount = ethers.utils.formatUnits(bountyAmount,decimals)
 		ubountiesInfo.push(ubounty)
 
@@ -1286,3 +1289,9 @@ async function getRevision(uI,sI,rI) {
 // 	await awarder.award(description,hunter,amount)
 //
 // }
+
+async function contribute(uI,amount){
+	let bcAddress = await getBountyChest(uI)
+	amount = ethers.utils.parseUnits(amount,decimals)
+	devcash.transfer(bcAddress,amount)
+}

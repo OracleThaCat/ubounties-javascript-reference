@@ -44,6 +44,7 @@ let HSTable   //Hunter Submissions Table
 
 let ubounties
 let users
+let event_logs
 
 async function initialize(web3) {
   await ethereum.enable()
@@ -59,8 +60,9 @@ async function initialize(web3) {
 
   ubounties = await getUbountiesInfo()
   users = await getUsers()
-
+  await gatherEventLogs()
 	populateFrontend()
+
 }
 
 async function populateFrontend(){
@@ -128,39 +130,6 @@ async function populateBalance(){
 
 
 
-
-//
-// function populateCreatorSelect(){
-//   console.log("populateCreatorSelect Multi")
-//   for (let j = 1; j<ubounties.length;j++){
-//     if(creatorList[ubounties[j].creatorIndex]==signer._address && ubounties[j].hunterIndex==0 && ubounties[j].numLeft!=0){
-//       var opt = document.createElement("option");
-//       console.log(j)
-//      opt.value= j;
-//      opt.innerHTML = j; // whatever property it has
-//
-//      // then append it to the select element
-//      document.getElementById("BountySelect").appendChild(opt);
-//    }
-//  }
-// }
-//
-// function populateHunterSelect(){
-//   console.log("populateHunterSelect")
-//   for (let j = 0; j<multiBounties.length;j++){
-//
-//      if(multiBounties[j].active==true){
-//        var opt = document.createElement("option");
-//        opt.value= j;
-//        opt.innerHTML = j; // whatever property it has
-//
-//        // then append it to the select element
-//        document.getElementById("BountySelect").appendChild(opt);
-//    }
-//  }
-// }
-//
-
 async function fApproveDevcash(){
   let amount = DApproveAmountInput.value;
   approveDevcash(amount)
@@ -182,4 +151,20 @@ async function fPostPersonalBounty(){
   let available = PBAvailableInput.value
   let amount = PBAmountInput.value
   await postPersonalBounty(name,description,hunter,available,amount,0)
+}
+
+async function getAddressLink(displayText, address){
+  let link = document.createElement("a")
+  link.innerHTML = displayText
+
+  let network = (await signer.provider.getNetwork()).name
+
+
+  if (network=="homestead"){
+    link.href ="https://etherscan.io/address/" + address
+  } else{
+    link.href = "https://" + network + ".etherscan.io/address/" + address
+  }
+  
+  return(link)
 }

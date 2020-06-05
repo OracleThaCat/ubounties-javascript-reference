@@ -10,6 +10,7 @@
     <script src="PosterManager.js"></script>
     <script src="HunterManager.js"></script>
     <script src="ManagerManager.js"></script>
+    <script src="event-reader.js"></script>
 
     <meta charset="utf-8">
     <title></title>
@@ -17,7 +18,7 @@
   <body>
 
       <h1>Antoine's uBounties dApp</h1>
-
+<hr>
 
 
     <h1>Balances</h1>
@@ -26,8 +27,7 @@
     <label id="DApprovedLabel">Approved: </label><br><br>
 
     <input id="DApproveAmountInput" placeholder = "amount..."></input><button onclick="fApproveDevcash()">Approve</button><br><br>
-    <hr>
-
+<hr>
 <h1>Bounty Poster</h1>
   <h3> Post Open Bounty</h3>
 
@@ -47,7 +47,6 @@
 </select> <br>
 <button onclick = "fPostOpenBounty()">Post</button>
 
-<hr>
 <h3> Post Personal Bounty </h3>
 <label>Fee: 10k Devcash. All fees recycled into the pre-IBO</label> <br> <br>
 
@@ -65,7 +64,6 @@
 <option value="604600">weeks</option>
 </select> <br>
 <button onclick = "fPostPersonalBounty()">Post</button>
-<hr>
 
 
 <h3>Award Bounty Directly</h3>
@@ -76,9 +74,8 @@
 <br>
 <button onclick = "award()">Award</button>
 
+
 <hr>
-
-
 
 <h1>Bounty Hunter</h1>
 
@@ -87,7 +84,7 @@
 
 <table>
   <thead>
-    <th>Creator</th>
+    <th>Poster</th>
     <th>Name</th>
     <th>Description</th>
     <th>Amount</th>
@@ -98,11 +95,10 @@
   <tbody id="OHTable">
   </tbody>
 </table>
-<hr>
 <h3>Available Personal Bounties</h3>
 <table>
   <thead>
-    <th>Creator</th>
+    <th>Poster</th>
     <th>Name</th>
     <th>Description</th>
     <th>Amount</th>
@@ -113,32 +109,29 @@
   <tbody id="PHTable">
   </tbody>
 </table>
-<hr></hr>
-<h3>Submissions</h3>
+<h3>Submissions Made</h3>
 <table>
   <thead>
-    <th>Creator</th>
-    <th>Name</th>
-    <th>Amount</th>
+    <th>Bounty-Name</th>
+    <th>Poster</th>
     <th>Submission</th>
-    <th>Status</th>
+    <th>Reward</th>
     <th>Deadline</th>
+    <th>Revision</th>
     <th>Revise</th>
+    <th>Status</th>
+
   </thead>
   <tbody id="HSTable">
   </tbody>
 </table>
 
+<hr>
 <h1>Bounty Manager</h1>
+<h3> Select Bounty</h3>
 
-<h3> Manage </h3>
-
-<select id="MBountySelect" onchange="updateSubmissionManager()">
-
-</select>
-<br><br>
-
-<h6> BOUNTIES </h6>
+<select id="MBountySelect" onchange="populateManagerManager()"></select>
+<h3> Bounty Info </h3>
 
 <label id="MCreatorLabel">Creator:</label> <br>
 <label id="MNameLabel">Name:</label> <br>
@@ -147,20 +140,48 @@
 <label id="MAmountLabel">Amount:</label> <br>
 <label id="MAvailableLabel">Num Bounties:</label> <br>
 <label id="MDeadlineLabel">Deadline:</label> <br>
-<input placeholder="amount..." id="CAmountInput"></input><button onclick="contribute()">Contribute</button> <br><br><br>
-<hr>
-<h6> SUBMISSIONS </h6>
+<input placeholder="amount..." id="CAmountInput"></input><button onclick="fContribute()">Contribute</button> <br><br><br>
 
-<select id="MSSubmissionSelect" onchange="updateSubmissionManager()"></select><br>
+
+
+<!-- <select id="MSSubmissionSelect" onchange="updateSubmissionManager()"></select><br>
 <label id="MSHunterLabel">Hunter:</label> <br>
 <label id="MSSubmissionLabel">Submission:</label> <br>
-<button onclick="reward()">Approve:</button> <br>
-
-
-<br><br>
+<button onclick="reward()">Approve:</button> <br> -->
 
 
 
+
+<h3>Submissions Received</h3>
+<table>
+  <thead>
+    <th>Id</th>
+    <th>Hunter</th>
+    <th>Submission</th>
+    <th>Revisions-Made</th>
+    <th>Status</th>
+  </thead>
+  <tbody id="MSTable">
+  </tbody>
+</table>
+<h3>Select Submission</h3>
+
+<select id="MSubmissionSelect" onchange="populateRevisions()"></select>
+<h3>View Revisions</h3>
+
+<table>
+  <caption>Revisions</caption>
+  <thead>
+    <th>Id</th>
+    <th>Revision</th>
+  </thead>
+  <tbody id="MSRTable">
+  </tbody>
+</table>
+<h3>Manage Submission</h3>
+
+<input placeholder = "feedback..." id="MFeedbackInput"></input> <button onclick="fApprove()">approve</button><button onclick="fReject()">reject</button><button onclick="fRequestRevision()">revise</button>
+<hr>
 
 
     <script>
