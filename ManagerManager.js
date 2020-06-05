@@ -15,9 +15,7 @@ async function populateBountyInfo(){
 
   let creatorAddress = users[ubounties[bountyId].creatorIndex]
 
-  let creatorLink = await getAddressLink(creatorAddress,creatorAddress)
-
-  MCreatorLabel.innerHTML = creatorLink
+  MCreatorLabel.innerHTML = "Poster: " + creatorAddress
   MNameLabel.innerHTML = "Name: " + ubounties[bountyId].name
   MDescriptionLabel.innerHTML = "Description: " + ubounties[bountyId].description
   if(ubounties[bountyId].hunterIndex==0){
