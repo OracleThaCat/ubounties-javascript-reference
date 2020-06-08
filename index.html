@@ -46,7 +46,7 @@
   <option value="604600">weeks</option>
 </select> <br>
 <button onclick = "fPostOpenBounty()">Post</button>
-
+<h3>Options</h3>
 <h3> Post Personal Bounty </h3>
 <label>Fee: 10k Devcash. All fees recycled into the pre-IBO</label> <br> <br>
 
@@ -126,6 +126,17 @@
   </tbody>
 </table>
 
+<h3>Bounty Rewards</h3>
+<table>
+  <thead>
+    <th>Bounty-Name</th>
+    <th>Poster</th>
+    <th>Reward</th>
+    <th>Date</th>
+  </thead>
+  <tbody id="HRTable">
+  </tbody>
+</table>
 <hr>
 <h1>Bounty Manager</h1>
 <h3> Select Bounty</h3>
@@ -181,6 +192,19 @@
 <h3>Manage Submission</h3>
 
 <input placeholder = "feedback..." id="MFeedbackInput"></input> <button onclick="fApprove()">approve</button><button onclick="fReject()">reject</button><button onclick="fRequestRevision()">revise</button>
+
+<h3>Bounties Concluded</h3>
+<table>
+  <thead>
+    <th>Bounty-Name</th>
+    <th>Rewarded</th>
+    <th>Status</th>
+    <th>Date</th>
+
+  </thead>
+  <tbody id="HSTable">
+  </tbody>
+</table>
 <hr>
 
 

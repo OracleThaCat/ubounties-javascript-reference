@@ -4,6 +4,7 @@
 //update statuses
 //refactor code, make neater, make consistent
 //make submissions update when you select new bounty
+//show bounty info all together in table
 
 const ubcABI = [
 	{
