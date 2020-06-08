@@ -1,10 +1,5 @@
 pragma solidity ^0.5.11;
 
-//CHANGES
-
-//award personal bounty directly to bounty hunter                   POSTPONED
-
-
 contract ERC20Basic {
   function totalSupply() public view returns (uint256);
   function balanceOf(address who) public view returns (uint256);
@@ -25,12 +20,11 @@ contract ERC20Approve {
 
 contract bountyChest{
     constructor () public {
-        ERC20Approve(0x83242d46037350FAd61FefF7fF697CfE983fD0EB).approve(msg.sender,2**256-1);
+        ERC20Approve(0x0f54093364b396461AAdf85C015Db597AAb56203).approve(msg.sender,2**256-1);
     }
 }
 
 contract ubountyCreator{
-
 
     event created(uint uBountyIndex,uint bountiesAvailable, uint tokenAmount, uint weiAmount);        //add a
 
@@ -41,16 +35,16 @@ contract ubountyCreator{
     event rejected(uint uBountyIndex, uint submissionIndex, string feedback);
     event revisionRequested(uint uBountyIndex, uint submissionIndex, string feedback);
 
-    event awarded(address poster, address hunter, string description, uint tokenAmount,uint weiAmount);
     event rewarded(uint uBountyIndex, address Hunter, uint tokenAmount,uint weiAmount);
 
     event reclaimed(uint uBountyIndex, uint tokenAmount, uint weiAmount);
+
     event completed(uint uBountyIndex);
 
     event feeChange(uint oldFee, uint newFee);
     event waiverChange(uint oldWaiver, uint newWaiver);
 
-    address public devcash = 0x83242d46037350FAd61FefF7fF697CfE983fD0EB;
+    address public devcash = 0x0f54093364b396461AAdf85C015Db597AAb56203;
     address public admin;
     address payable public collector = 0xB1F445F64CDDe81d58c26ab1C340FE2a82F55A4C;
 
@@ -64,7 +58,6 @@ contract ubountyCreator{
         mapping(uint=>string) revisions;
         uint8 numRevisions;
     }
-
 
     struct ubounty{
         uint8 available;          //rename to avaiable
@@ -82,7 +75,6 @@ contract ubountyCreator{
     mapping(uint => ubounty) public ubounties;
     uint public numUbounties;
 
-
     function getSubmission(uint ubountyIndex, uint submissionIndex) public view returns(string memory,address, bool,uint) {
         return (
             ubounties[ubountyIndex].submissions[submissionIndex].submissionString,
@@ -95,9 +87,6 @@ contract ubountyCreator{
         return ubounties[ubountyIndex].submissions[submissionIndex].revisions[revisionIndex];
     }
 
-
-
-
     mapping(address=>uint32) bountyChests;
     address[] public bCList; //list of bounty chest addresses
     uint[] public freeBC; // list of unused bounty chests
@@ -105,14 +94,11 @@ contract ubountyCreator{
         return bCList.length;
     }
 
-
     mapping(address => uint32) public users;
     address payable[] public userList;
     function numUsers() public view returns(uint){
         return userList.length;
     }
-
-
 
     constructor() public {
         admin = msg.sender;
@@ -154,8 +140,6 @@ contract ubountyCreator{
                 bCList.push(bCAddress);
             }
 
-
-
             uint weiAmount = msg.value-_fee;
 
             ubounties[numUbounties].creatorIndex = users[msg.sender];
@@ -170,7 +154,6 @@ contract ubountyCreator{
             } else {
                ubounties[numUbounties].deadline = deadline;
             }
-
 
             collector.transfer(_fee);
             ERC20(devcash).transferFrom(msg.sender,bCAddress,amount);
@@ -242,6 +225,7 @@ contract ubountyCreator{
 
         uint rewardAmount = bountyAmount(ubountyIndex)/ubounties[ubountyIndex].available;
         uint weiRewardAmount = weiBountyAmount(ubountyIndex)/ubounties[ubountyIndex].available;
+        ubounties[ubountyIndex].weiAmount-= weiRewardAmount;
         ubounties[ubountyIndex].available--;
 
         ERC20(devcash).transferFrom(bCList[ubounties[ubountyIndex].bountyChestIndex],hunter,rewardAmount);
@@ -250,14 +234,30 @@ contract ubountyCreator{
         if(ubounties[ubountyIndex].available==0){
             freeBC.push(ubounties[ubountyIndex].bountyChestIndex);
             ubounties[ubountyIndex].deadline=0;
+            emit completed(ubountyIndex);
         }
         emit rewarded(ubountyIndex,hunter,rewardAmount,weiRewardAmount);
     }
 
-    function awardPersonalBounty(string memory description, address payable hunter, uint tokenAmount, uint weiAmount) public payable {
-        ERC20(devcash).transferFrom(msg.sender,hunter,tokenAmount);
+    function awardPersonalBounty(string memory name, string memory description, address payable hunter, uint tokenAmount, uint weiAmount) public payable {
+        if (users[msg.sender]==0){
+                users[msg.sender] = uint32(userList.length);
+                userList.push(msg.sender);
+            }
+
+            if(users[hunter]==0){
+                users[hunter] = uint32(userList.length);
+                userList.push(hunter);
+            }
+        ubounties[numUbounties].creatorIndex = users[msg.sender];
+        ubounties[numUbounties].hunterIndex = users[hunter];
+        ubounties[numUbounties].name = name;
+        ubounties[numUbounties].description = description;
+
         hunter.transfer(weiAmount);
-        emit awarded(msg.sender,hunter,description,tokenAmount,weiAmount);
+        ERC20(devcash).transferFrom(msg.sender,hunter,tokenAmount);
+        emit rewarded(numUbounties,hunter,tokenAmount,weiAmount);
+        emit completed(numUbounties++);
     }
 
     function submit(uint ubountyIndex, string memory submissionString) public {
@@ -265,16 +265,15 @@ contract ubountyCreator{
         require(now<=ubounties[ubountyIndex].deadline,"The bounty deadline has passed");
         require(ubounties[ubountyIndex].available>0,"This bounty is inactive");  //make sure available is more than 0
 
-         if(users[msg.sender]==0){
-                users[msg.sender] = uint32(userList.length);
-                userList.push(msg.sender);
-            }
+        if(users[msg.sender]==0){
+            users[msg.sender] = uint32(userList.length);
+            userList.push(msg.sender);
+        }
 
         ubounties[ubountyIndex].submissions[ubounties[ubountyIndex].numSubmissions].submissionString = submissionString;
         ubounties[ubountyIndex].submissions[ubounties[ubountyIndex].numSubmissions].submitterIndex = users[msg.sender];
 
         emit submitted(ubountyIndex,ubounties[ubountyIndex].numSubmissions++);
-
     }
 
     function revise(uint ubountyIndex, uint32 submissionIndex, string memory revisionString) public {
@@ -321,11 +320,13 @@ contract ubountyCreator{
 
         uint rewardAmount = bountyAmount(ubountyIndex)/ubounties[ubountyIndex].available;
         uint weiRewardAmount = weiBountyAmount(ubountyIndex)/ubounties[ubountyIndex].available;
+        ubounties[ubountyIndex].weiAmount-=weiRewardAmount;
         ubounties[ubountyIndex].available--;
-        emit rewarded(ubountyIndex,hunter,rewardAmount,weiRewardAmount);
 
         hunter.transfer(weiRewardAmount);
         ERC20(devcash).transferFrom(bCList[ubounties[ubountyIndex].bountyChestIndex],hunter,rewardAmount);
+
+        emit rewarded(ubountyIndex,hunter,rewardAmount,weiRewardAmount);
 
         if(ubounties[ubountyIndex].available==0){
             freeBC.push(ubounties[ubountyIndex].bountyChestIndex);
