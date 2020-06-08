@@ -1,6 +1,7 @@
 pragma solidity ^0.5.11;
 
-//Contract deployed on ropsten: 0x54358C65629f50463464D7801A7FF0dA12a5B45D
+//Contract deployed on ropsten: 0xeA67764DD6Dc2B4ED82d6c0B2a79115B6F1a5A92
+//Test Cash contract: 0x0f54093364b396461AAdf85C015Db597AAb56203
 
 contract ERC20Basic {
   function totalSupply() public view returns (uint256);
@@ -234,7 +235,6 @@ contract ubountyCreator{
 
         if(ubounties[ubountyIndex].available==0){
             freeBC.push(ubounties[ubountyIndex].bountyChestIndex);
-            ubounties[ubountyIndex].deadline=0;
             emit completed(ubountyIndex);
         }
         emit rewarded(ubountyIndex,hunter,rewardAmount,weiRewardAmount);
@@ -282,9 +282,8 @@ contract ubountyCreator{
 
     function revise(uint ubountyIndex, uint32 submissionIndex, string memory revisionString) public {
         require(msg.sender==userList[ubounties[ubountyIndex].submissions[submissionIndex].submitterIndex],"You are not the submitter");
-        require(now<=ubounties[ubountyIndex].deadline,"The bounty deadline has passed");
-        require(ubounties[ubountyIndex].submissions[submissionIndex].approved==false,"This bounty has already been approved");
         require(ubounties[ubountyIndex].available>0,"This bounty is inactive");  //make sure available is more than 0
+        require(ubounties[ubountyIndex].submissions[submissionIndex].approved==false,"This submission has already been approved");
 
         uint8 numRevisions = ubounties[ubountyIndex].submissions[submissionIndex].numRevisions;
         ubounties[ubountyIndex].submissions[submissionIndex].revisions[numRevisions] = revisionString;
@@ -295,8 +294,8 @@ contract ubountyCreator{
     function approve(uint ubountyIndex,uint submissionIndex,string memory feedback) public{
         require(users[msg.sender]==ubounties[ubountyIndex].creatorIndex,"You are not the bounty publisher");
         require(ubounties[ubountyIndex].available>0,"This bounty is inactive");
-        require(ubounties[ubountyIndex].submissions[submissionIndex].approved==false,"This bounty has already been approved");
         require(submissionIndex<ubounties[ubountyIndex].numSubmissions,"Submission does not exist");
+        require(ubounties[ubountyIndex].submissions[submissionIndex].approved==false,"This submission has already been approved");
 
         emit approved(ubountyIndex, submissionIndex, feedback);
         ubounties[ubountyIndex].submissions[submissionIndex].approved=true;
@@ -307,6 +306,7 @@ contract ubountyCreator{
     function reject(uint ubountyIndex,uint submissionIndex,string memory feedback) public{
         require(users[msg.sender]==ubounties[ubountyIndex].creatorIndex,"You are not the bounty publisher");
         require(ubounties[ubountyIndex].available>0,"This bounty is inactive");
+        require(submissionIndex<ubounties[ubountyIndex].numSubmissions,"Submission does not exist");
         require(ubounties[ubountyIndex].submissions[submissionIndex].approved==false,"This bounty has already been approved");
 
         emit rejected(ubountyIndex, submissionIndex, feedback);
@@ -315,6 +315,7 @@ contract ubountyCreator{
     function requestRevision(uint ubountyIndex,uint submissionIndex,string memory feedback) public {
         require(users[msg.sender]==ubounties[ubountyIndex].creatorIndex,"You are not the bounty publisher");
         require(ubounties[ubountyIndex].available>0,"This bounty is inactive");
+        require(submissionIndex<ubounties[ubountyIndex].numSubmissions,"Submission does not exist");
         require(ubounties[ubountyIndex].submissions[submissionIndex].approved==false,"This bounty has already been approved");
 
         emit revisionRequested(ubountyIndex,submissionIndex,feedback);
@@ -334,10 +335,37 @@ contract ubountyCreator{
 
         if(ubounties[ubountyIndex].available==0){
             freeBC.push(ubounties[ubountyIndex].bountyChestIndex);
-            ubounties[ubountyIndex].deadline=0;
             emit completed(ubountyIndex);
         }
     }
+
+    function reclaim(uint ubountyIndex) public {
+        require(users[msg.sender]==ubounties[ubountyIndex].creatorIndex,"You are not the bounty creator");
+        require(ubounties[ubountyIndex].deadline!=2**48-1,"This bounty was created without a deadline, and is not reclaimable");
+        require(now>ubounties[ubountyIndex].deadline,"The bounty deadline has not yet elapsed");
+        require(ubounties[ubountyIndex].available>0,"This bounty is inactive");
+
+        uint weiAmount = weiBountyAmount(ubountyIndex);
+        ubounties[ubountyIndex].weiAmount = 0;
+
+        ERC20(devcash).transferFrom(bCList[ubounties[ubountyIndex].bountyChestIndex],msg.sender,bountyAmount(ubountyIndex));
+        msg.sender.transfer(weiAmount);
+
+        freeBC.push(ubounties[ubountyIndex].bountyChestIndex);
+
+        ubounties[ubountyIndex].available = 0;
+
+        emit reclaimed(ubountyIndex,bountyAmount(ubountyIndex),weiAmount);
+    }
+
+    function reclaimable(uint ubountyIndex) public view returns(bool){
+        if(now>ubounties[ubountyIndex].deadline){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     function bountyAmount(uint ubountyIndex) public view returns(uint){
         return(ERC20(devcash).balanceOf(bCList[ubounties[ubountyIndex].bountyChestIndex]));
@@ -345,21 +373,6 @@ contract ubountyCreator{
 
     function weiBountyAmount(uint ubountyIndex) public view returns(uint){
         return(ubounties[ubountyIndex].weiAmount);
-    }
-
-    function reclaim(uint ubountyIndex) public {
-        require(users[msg.sender]==ubounties[ubountyIndex].creatorIndex,"You are not the bounty creator");
-        require(now>ubounties[ubountyIndex].deadline,"The bounty deadline has not yet elapsed");
-        require(ubounties[ubountyIndex].bountyChestIndex!=0,"This bounty is inactive");
-
-        emit reclaimed(ubountyIndex,bountyAmount(ubountyIndex),weiBountyAmount(ubountyIndex));
-
-        ERC20(devcash).transferFrom(bCList[ubounties[ubountyIndex].bountyChestIndex],msg.sender,bountyAmount(ubountyIndex));
-
-        freeBC.push(ubounties[ubountyIndex].bountyChestIndex);
-        ubounties[ubountyIndex].bountyChestIndex=0;
-        ubounties[ubountyIndex].deadline=0;
-        ubounties[ubountyIndex].available = 0;
     }
 
     function createBountyChest() public {
