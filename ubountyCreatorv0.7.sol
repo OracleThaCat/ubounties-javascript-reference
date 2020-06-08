@@ -1,5 +1,7 @@
 pragma solidity ^0.5.11;
 
+//Contract deployed on ropsten: 0x54358C65629f50463464D7801A7FF0dA12a5B45D
+
 contract ERC20Basic {
   function totalSupply() public view returns (uint256);
   function balanceOf(address who) public view returns (uint256);
