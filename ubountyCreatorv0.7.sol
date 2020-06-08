@@ -31,6 +31,7 @@ contract bountyChest{
 
 contract ubountyCreator{
 
+
     event created(uint uBountyIndex,uint bountiesAvailable, uint tokenAmount, uint weiAmount);        //add a
 
     event submitted(uint uBountyIndex, uint submissionIndex);
@@ -40,7 +41,9 @@ contract ubountyCreator{
     event rejected(uint uBountyIndex, uint submissionIndex, string feedback);
     event revisionRequested(uint uBountyIndex, uint submissionIndex, string feedback);
 
+    event awarded(address poster, address hunter, string description, uint tokenAmount,uint weiAmount);
     event rewarded(uint uBountyIndex, address Hunter, uint tokenAmount,uint weiAmount);
+
     event reclaimed(uint uBountyIndex, uint tokenAmount, uint weiAmount);
     event completed(uint uBountyIndex);
 
@@ -80,8 +83,6 @@ contract ubountyCreator{
     uint public numUbounties;
 
 
-
-
     function getSubmission(uint ubountyIndex, uint submissionIndex) public view returns(string memory,address, bool,uint) {
         return (
             ubounties[ubountyIndex].submissions[submissionIndex].submissionString,
@@ -93,6 +94,7 @@ contract ubountyCreator{
     function getRevision(uint ubountyIndex,uint submissionIndex, uint revisionIndex) public view returns (string memory){
         return ubounties[ubountyIndex].submissions[submissionIndex].revisions[revisionIndex];
     }
+
 
 
 
@@ -233,7 +235,7 @@ contract ubountyCreator{
             emit created(numUbounties++,available,amount,weiAmount);
     }
 
-    function award(uint ubountyIndex, address payable hunter) public{
+    function awardOpenBounty(uint ubountyIndex, address payable hunter) public{
         require(users[msg.sender]==ubounties[ubountyIndex].creatorIndex,"You are not the bounty publisher");
         require(ubounties[ubountyIndex].available>0,"This bounty is inactive");
         require(ubounties[ubountyIndex].hunterIndex==0,"Only works for Open Bounties");
@@ -241,7 +243,6 @@ contract ubountyCreator{
         uint rewardAmount = bountyAmount(ubountyIndex)/ubounties[ubountyIndex].available;
         uint weiRewardAmount = weiBountyAmount(ubountyIndex)/ubounties[ubountyIndex].available;
         ubounties[ubountyIndex].available--;
-        emit rewarded(ubountyIndex,hunter,rewardAmount,weiRewardAmount);
 
         ERC20(devcash).transferFrom(bCList[ubounties[ubountyIndex].bountyChestIndex],hunter,rewardAmount);
         hunter.transfer(weiRewardAmount);
@@ -250,9 +251,14 @@ contract ubountyCreator{
             freeBC.push(ubounties[ubountyIndex].bountyChestIndex);
             ubounties[ubountyIndex].deadline=0;
         }
+        emit rewarded(ubountyIndex,hunter,rewardAmount,weiRewardAmount);
     }
 
-
+    function awardPersonalBounty(string memory description, address payable hunter, uint tokenAmount, uint weiAmount) public payable {
+        ERC20(devcash).transferFrom(msg.sender,hunter,tokenAmount);
+        hunter.transfer(weiAmount);
+        emit awarded(msg.sender,hunter,description,tokenAmount,weiAmount);
+    }
 
     function submit(uint ubountyIndex, string memory submissionString) public {
         require(ubounties[ubountyIndex].hunterIndex==0 || msg.sender==userList[ubounties[ubountyIndex].hunterIndex],"You are not the bounty hunter");
@@ -324,6 +330,7 @@ contract ubountyCreator{
         if(ubounties[ubountyIndex].available==0){
             freeBC.push(ubounties[ubountyIndex].bountyChestIndex);
             ubounties[ubountyIndex].deadline=0;
+            emit completed(ubountyIndex);
         }
     }
 
