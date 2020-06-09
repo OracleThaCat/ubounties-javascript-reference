@@ -355,6 +355,12 @@ contract ubountyCreator{
 
         ubounties[ubountyIndex].available = 0;
 
+        for(uint i=0;i<ubounties[ubountyIndex].numSubmissions&&i<1800;i++){
+            if(ubounties[ubountyIndex].submissions[i].approved==false){
+                emit rejected(ubountyIndex,i,"bounty has been reclaimed");
+            }
+        }
+
         emit reclaimed(ubountyIndex,bountyAmount(ubountyIndex),weiAmount);
     }
 
