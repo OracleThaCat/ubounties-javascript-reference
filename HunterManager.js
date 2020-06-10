@@ -34,7 +34,7 @@ async function populateHunterManager() {
 
       let ethRewardText = ubounties[j].ethAmount + " ETH"
 
-      let deadline = "none"
+      let deadline = getDeadline(ubounties[j].deadline)
 
       let submissionInput = document.createElement("input")
       submissionInput.placeholder = "submission..."
@@ -121,7 +121,7 @@ async function populateHunterManager() {
     let rewardText = ubounties[uI].amount + " " + symbol
     let rewardAddress = await getBountyChest(ubounties[uI].bountyChestIndex)
     let rewardLink = await getAddressLink(rewardText,rewardAddress)
-    
+
     let ethRewardText = ubounties[uI].ethAmount + " ETH"
 
     let status = getSubmissionStatus(uI,sI)

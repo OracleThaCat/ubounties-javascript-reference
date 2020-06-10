@@ -7,6 +7,7 @@
 //add bounty activity
 //add submissions and revisions to submission status
 //show all bounties
+//blank out award bounty on personal bounties
 
 const ubcABI = [
 	{
@@ -1008,7 +1009,7 @@ const ubcABI = [
 		"type": "function"
 	}
 ]
-const ubcAddress = "0x847180438374dF2D32b3fdA30d5dc51485E03E7F"//'0xB02C37e7036692dC8bbB99f58FBA034b2D112236';
+const ubcAddress = "0x4572cd41D0ea7c69bD8A3A7C213F04eD83BB4976"//'0xB02C37e7036692dC8bbB99f58FBA034b2D112236';
 let ubc // Universal Bounty Creator Contract
 let provider
 let signer
@@ -1445,6 +1446,12 @@ async function getUsers() {
 //am = Amount
 //d = deadline
 async function postOpenBounty(name,description,available,amount,ethAmount,deadline){
+	if(amount==""){
+		amount = 0
+	}
+	if(ethAmount==""){
+		ethAmount = 0
+	}
 	amount = ethers.utils.parseUnits(amount.toString(),decimals)
 	ethAmount = ethers.utils.parseEther(ethAmount)
 	let overrides = {
@@ -1459,6 +1466,12 @@ async function postOpenBounty(name,description,available,amount,ethAmount,deadli
 //am = Amount
 //d = deadline
 async function postPersonalBounty(name,description,hunter,available,amount,ethAmount,deadline) {
+	if(amount==""){
+		amount = 0
+	}
+	if(ethAmount==""){
+		ethAmount = 0
+	}
 	amount = ethers.utils.parseUnits(amount.toString(),decimals)
 	ethAmount = ethers.utils.parseEther(ethAmount)
 	let overrides = {

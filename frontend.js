@@ -97,7 +97,7 @@ async function getElements(){
   OBAvailableInput = document.getElementById("OBAvailableInput")
   OBAmountInput = document.getElementById("OBAmountInput")
   OBTimeIntervalInput = document.getElementById("OBTimeIntervalInput")
-  OBTimeFrameSelect = document.getElementById("OBIntervalSelect")
+  OBTimeFrameSelect = document.getElementById("OBTimeFrameSelect")
 
   PBHunterInput = document.getElementById("PBHunterInput")
   PBNameInput = document.getElementById("PBNameInput")
@@ -105,7 +105,8 @@ async function getElements(){
   PBAvailableInput = document.getElementById("PBAvailableInput")
   PBAmountInput = document.getElementById("PBAmountInput")
   PBDeadlineInput = document.getElementById("PBDeadlineInput")
-  PBIntervalSelect = document.getElementById("PBIntervalSelect")
+  PBTimeIntervalInput = document.getElementById("PBTimeIntervalInput")
+  PBTimeFrameSelect = document.getElementById("PBTimeFrameSelect")
 
   ABHunterInput = document.getElementById("ABHunterInput")
   ABNameInput = document.getElementById("ABNameInput")
@@ -160,8 +161,9 @@ async function fPostOpenBounty(){
   let available = OBAvailableInput.value
   let amount = OBAmountInput.value
   let ethAmount = OBEthAmountInput.value
+  let deadline = parseInt((Date.now()/1000 + OBTimeIntervalInput.value*OBTimeFrameSelect.value))
   //let deadline = OB
-  await postOpenBounty(name,description,available,amount,ethAmount,0)
+  await postOpenBounty(name,description,available,amount,ethAmount,deadline)
 }
 
 async function fPostPersonalBounty(){
@@ -171,7 +173,12 @@ async function fPostPersonalBounty(){
   let available = PBAvailableInput.value
   let amount = PBAmountInput.value
   let ethAmount = PBEthAmountInput.value
-  await postPersonalBounty(name,description,hunter,available,amount,ethAmount,0)
+  let deadline = parseInt((Date.now()/1000 + PBTimeIntervalInput.value*PBTimeFrameSelect.value))
+  await postPersonalBounty(name,description,hunter,available,amount,ethAmount,deadline)
+}
+
+function getDeadline(timeInterval,timeFrame){
+
 }
 
 async function fAwardOpenBounty(){
@@ -209,4 +216,12 @@ async function getAddressLink(displayText, address){
   }
 
   return(link)
+}
+
+function getDeadline(time){
+  if(time==281474976710655){
+    return("none")
+  } else{
+    return(new Date(time*1000))
+  }
 }
