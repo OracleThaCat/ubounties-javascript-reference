@@ -24,6 +24,7 @@ async function populateBountyInfo(){
     MHunterLabel.innerHTML = "Hunter: " + users[ubounties[bountyId].hunterIndex]
   }
   MAmountLabel.innerHTML = "Amount: " + ubounties[bountyId].amount + " " + symbol
+  MEthAmountLabel.innerHTML = "Eth Amount: " + ubounties[bountyId].ethAmount + " ETH"
   MAvailableLabel.innerHTML = "Available: " + ubounties[bountyId].available
   //document.getElementById("submissionLabel").innerHTML = "Submission: " + ubounties[bountyId].submissionStrings[ubounties[bountyId].numSubmissions-1]
   MDeadlineLabel.innerHTML = "Deadline: none"

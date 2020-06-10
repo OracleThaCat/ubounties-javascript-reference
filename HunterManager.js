@@ -18,6 +18,8 @@ async function populateHunterManager() {
       cell5 = document.createElement("td");
       cell6 = document.createElement("td");
       cell7 = document.createElement("td");
+      cell7 = document.createElement("td");
+      cell8 = document.createElement("td");
 
       let creatorAddress = users[ubounties[j].creatorIndex]
       let creatorLink = await getAddressLink(creatorAddress,creatorAddress)
@@ -26,9 +28,11 @@ async function populateHunterManager() {
       let description = ubounties[j].description
       console.log(ubounties[j].bountyChestIndex)
 
-      let rewardText = ubounties[j].amount + " " + symbol
       let rewardAddress = await getBountyChest(ubounties[j].bountyChestIndex)
+      let rewardText = ubounties[j].amount + " " + symbol
       let rewardLink = await getAddressLink(rewardText,rewardAddress)
+
+      let ethRewardText = ubounties[j].ethAmount + " ETH"
 
       let deadline = "none"
 
@@ -46,17 +50,17 @@ async function populateHunterManager() {
 
            textnode2=document.createTextNode(name);
            textnode3=document.createTextNode(description);
+           textnode4=document.createTextNode(ethRewardText)
            textnode5=document.createTextNode(deadline);
 
            cell1.appendChild(creatorLink);
            cell2.appendChild(textnode2);
            cell3.appendChild(textnode3);
            cell4.appendChild(rewardLink);
-           cell5.appendChild(textnode5);
-           cell6.appendChild(submissionInput);
-           cell7.appendChild(submitButton);
-
-
+           cell5.appendChild(textnode4)
+           cell6.appendChild(textnode5);
+           cell7.appendChild(submissionInput);
+           cell8.appendChild(submitButton);
 
            row.appendChild(cell1);
            row.appendChild(cell2);
@@ -65,6 +69,7 @@ async function populateHunterManager() {
            row.appendChild(cell5);
            row.appendChild(cell6);
            row.appendChild(cell7);
+           row.appendChild(cell8);
 
           if(ubounties[j].hunterIndex==0){
            OHTable.appendChild(row);
@@ -78,9 +83,10 @@ async function populateHunterManager() {
 }
 
   async function addSubmissions(ubountyIndex){
-    console.log
+
     let bounty = ubounties[ubountyIndex]
     let submissions = bounty.submissions
+    if (submissions.length==0){return}
     for (let j = 0; j<submissions.length;j++){
       let s = submissions[j]
       if(s[1]==signer._address){
@@ -103,6 +109,7 @@ async function populateHunterManager() {
     cell6 = document.createElement("td");
     cell7 = document.createElement("td");
     cell8 = document.createElement("td");
+    cell9 = document.createElement("td");
 
     let name = ubounties[uI].name
 
@@ -114,6 +121,8 @@ async function populateHunterManager() {
     let rewardText = ubounties[uI].amount + " " + symbol
     let rewardAddress = await getBountyChest(ubounties[uI].bountyChestIndex)
     let rewardLink = await getAddressLink(rewardText,rewardAddress)
+    
+    let ethRewardText = ubounties[uI].ethAmount + " ETH"
 
     let status = getSubmissionStatus(uI,sI)
     let deadline = "none"
@@ -130,6 +139,7 @@ async function populateHunterManager() {
 
           textnode1=document.createTextNode(name);
           textnode3=document.createTextNode(submission);
+          textnode4=document.createTextNode(ethRewardText)
           textnode5=document.createTextNode(deadline);
           statusTextNode=document.createTextNode(status);
 
@@ -137,11 +147,11 @@ async function populateHunterManager() {
           cell2.appendChild(posterLink);
           cell3.appendChild(textnode3);
           cell4.appendChild(rewardLink);
-          cell5.appendChild(textnode5);
-          cell6.appendChild(revisionInput);
-          cell7.appendChild(reviseButton);
-          cell8.appendChild(statusTextNode);
-
+          cell5.appendChild(textnode4)
+          cell6.appendChild(textnode5);
+          cell7.appendChild(revisionInput);
+          cell8.appendChild(reviseButton);
+          cell9.appendChild(statusTextNode);
 
           row.appendChild(cell1);
           row.appendChild(cell2);
@@ -151,6 +161,7 @@ async function populateHunterManager() {
           row.appendChild(cell6);
           row.appendChild(cell7);
           row.appendChild(cell8);
+          row.appendChild(cell9);
 
     HSTable.appendChild(row)
 

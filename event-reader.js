@@ -9,18 +9,17 @@ async function gatherEventLogs(){
 
 	let provider = ethers.getDefaultProvider("ropsten");
 
-
-
-	let createdTopic = ethers.utils.id("created(uint256,uint256,uint256)")
+	let createdTopic = ethers.utils.id("created(uint256,uint256,uint256,uint256)")
 	let submittedTopic = ethers.utils.id("submitted(uint256,uint256)");
 	let revisedTopic = ethers.utils.id("revised(uint256,uint256,uint256)");
 	let approvedTopic = ethers.utils.id("approved(uint256,uint256,string)");
 	let rejectedTopic = ethers.utils.id("rejected(uint256,uint256,string)");
 	let revisionRequestedTopic = ethers.utils.id("revisionRequested(uint256,uint256,string)");
-	let rewardedTopic = ethers.utils.id("rewarded(uint256,address,uint256)");
-	let reclaimedTopic = ethers.utils.id("reclaimed(uint256,uint256)");
+	let rewardedTopic = ethers.utils.id("rewarded(uint256,address,uint256,uint256)");
+	let reclaimedTopic = ethers.utils.id("reclaimed(uint256,uint256,uint256)");
 	let completedTopic = ethers.utils.id("completed(uint256)");
 	let feeChangeTopic = ethers.utils.id("feeChange(uint256,uint256)");
+	let waiverChangeTopic = ethers.utils.id("waiverChange(uint256,uint256)");
 
 
 	let createdFilter = createFilter(createdTopic)
@@ -33,6 +32,7 @@ async function gatherEventLogs(){
 	let reclaimedFilter = createFilter(reclaimedTopic)
 	let completedFilter = createFilter(completedTopic)
   let feeChangedFilter = createFilter(feeChangeTopic)
+	let waiverChangedFilter = createFilter(waiverChangeTopic)
 
 	let createdLogs = await provider.getLogs(createdFilter)
 	let submittedLogs = await provider.getLogs(submittedFilter)
@@ -44,8 +44,7 @@ async function gatherEventLogs(){
 	let reclaimedLogs = await provider.getLogs(reclaimedFilter)
 	let completedLogs= await provider.getLogs(completedFilter)
   let feeChangedLogs = await provider.getLogs(feeChangedFilter)
-
-
+	let waiverChangedLogs = await provider.getLogs(waiverChangedFilter)
 
 	let createdInfo = await getCreatedInfo(createdLogs)
 	let submittedInfo = await getSubmittedInfo(submittedLogs)
@@ -57,10 +56,10 @@ async function gatherEventLogs(){
 	let reclaimedInfo = await getReclaimedInfo(reclaimedLogs)
 	let completedInfo = await getCompletedInfo(completedLogs)
   let feeChangedInfo = await getFeeChangedInfo(feeChangedLogs)
+	let waiverChangedInfo = await getWaiverChangedInfo(waiverChangedLogs)
 
-   let orderedFeedback = await getOrderedFeedback(approvedLogs,rejectedLogs,revisionRequestedLogs)
-  // let orderedRejectedInfo = getOrderedRejectedInfo(rejectedHexArray)
-  // let orderedRevisionRequestedInfo = getOrderedRevisionRequestedInfo(revisionRequestedHexArray)
+  let orderedFeedback = await getOrderedFeedback(approvedLogs,rejectedLogs,revisionRequestedLogs)
+
 
 	event_logs.created = createdInfo
 	event_logs.submitted = submittedInfo
@@ -72,6 +71,8 @@ async function gatherEventLogs(){
 	event_logs.reclaimed = reclaimedInfo
 	event_logs.completed = completedInfo
   event_logs.feeChanged = feeChangedInfo
+	event_logs.waiverChanged = waiverChangedInfo
+
   event_logs.orderedFeedback = orderedFeedback
 
 }
@@ -134,8 +135,9 @@ async function getCreatedInfo(createdLogs){
   		let log = createdHexArray[n]
   		let eventInfo = new Object()
   		eventInfo.ubountyIndex = HexToInt(log[0],0)
-  		eventInfo.bountyAmount  = HexToInt(log[1],decimals)
-  		eventInfo.bountiesAvailable = HexToInt(log[2],0)
+			eventInfo.bountiesAvailable = HexToInt(log[1],0)
+  		eventInfo.bountyAmount  = HexToInt(log[2],decimals)
+			eventInfo.ethBountyAmount = HexToInt(log[3],18)
       eventInfo.eventInfo = createdLogs[n]
       eventInfo.timestamp = await getTimeStamp(createdLogs[n].blockNumber)
       eventInfo.nonce = await getNonce(createdLogs[n].transactionHash)
@@ -250,8 +252,8 @@ async function getRewardedInfo(rewardedLogs){
   		let eventInfo = new Object()
   		eventInfo.ubountyIndex = HexToInt(log[0],0)
   		eventInfo.hunter  = HexToAddress(log[1])
-  		eventInfo.rewardAmount = HexToInt(log[2],0)
-
+  		eventInfo.rewardAmount = HexToInt(log[2],decimals)
+			eventInfo.ethRewardAmount = HexToInt(log[3],18)
       eventInfo.eventInfo = rewardedLogs[n]
       eventInfo.timestamp = await getTimeStamp(rewardedLogs[n].blockNumber)
       eventInfo.nonce = await getNonce(rewardedLogs[n].transactionHash)
@@ -268,6 +270,7 @@ async function getReclaimedInfo(reclaimedLogs){
   		let eventInfo = new Object()
   		eventInfo.ubountyIndex = HexToInt(log[0],0)
   		eventInfo.reclaimedAmount  = HexToInt(log[1],8)
+			eventInfo.ethReclaimedAmount = HexToInt(log[2],18)
 
       eventInfo.eventInfo = reclaimedLogs[n]
       eventInfo.timestamp = await getTimeStamp(reclaimedLogs[n].blockNumber)
@@ -309,6 +312,24 @@ async function getFeeChangedInfo(feeChangedLogs){
   		feeChangedInfo.push(eventInfo)
   	}
     return(feeChangedInfo)
+}
+
+async function getWaiverChangedInfo(waiverChangedLogs){
+  let waiverChangedHexArray = ArrayifyLogData(waiverChangedLogs)
+
+  let waiverChangedInfo = new Array()
+  for (n=0;n<waiverChangedHexArray.length;n++){
+  		let log = waiverChangedHexArray[n]
+  		let eventInfo = new Object()
+  		eventInfo.oldWaiver = HexToInt(log[0],8)
+  		eventInfo.newWaiver  = HexToInt(log[1],8)
+
+      eventInfo.eventInfo = waiverChangedLogs[n]
+      eventInfo.timestamp = await getTimeStamp(waiverChangedLogs[n].blockNumber)
+      eventInfo.nonce = await getNonce(waiverChangedLogs[n].transactionHash)
+  		waiverChangedInfo.push(eventInfo)
+  	}
+    return(waiverChangedInfo)
 }
 
 async function getOrderedFeedback(approvedLogs,rejectedLogs,revisionRequestedLogs){
@@ -510,8 +531,10 @@ async function getAwarded() {
 }
 
 function getSubmissionStatus(uI,sI){
-  console.log(uI,sI)
-  let events = event_logs.orderedFeedback[uI][sI]
-  let status = events[events.length-1].event
-  return(status)
+	try{
+		let events = event_logs.orderedFeedback[uI][sI]
+		return(events[events.length-1].event)
+	} catch {
+		return("awaiting feedback")
+	}
 }

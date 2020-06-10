@@ -29,14 +29,15 @@
     <input id="DApproveAmountInput" placeholder = "amount..."></input><button onclick="fApproveDevcash()">Approve</button><br><br>
 <hr>
 <h1>Bounty Poster</h1>
+<label id="FeeLabel">Fee: 0.001 ETH</label> <br>
+<label id="WaiverLabel">Waiver: 10,000 DEV</label> <br><br>
   <h3> Post Open Bounty</h3>
-
-  <label>Fee: 10k Devcash. All fees recycled into the pre-IBO</label> <br> <br>
 
 <input id="OBNameInput" placeholder="name..."></input> <br>
 <input id="OBDescriptionInput" placeholder="description..."></input> <br>
 <input id="OBAvailableInput" type="number" placeholder="number of bounties..."></input> <br>
-<input id="OBAmountInput" placeholder="bounty amount..."></input> <br>
+<input id="OBAmountInput" placeholder="DEV bounty amount..."></input> <br>
+<input id="OBEthAmountInput" placeholder="ETH bounty amount..."></input> <br>
 <input id="OBTimeIntervalInput" placeholder="deadline..." ></input>
 <select id="OBTimeFrameSelect">
   <option value="1">seconds</option>
@@ -54,7 +55,8 @@
 <input id="PBNameInput" placeholder="name..."></input> <br>
 <input id="PBDescriptionInput" placeholder="description..."></input> <br>
 <input id="PBAvailableInput" type="number" placeholder="number of bounties..."></input> <br>
-<input id="PBAmountInput" placeholder="bounty amount..."></input> <br>
+<input id="PBAmountInput" placeholder="DEV bounty amount..."></input> <br>
+<input id="PBEthAmountInput" placeholder="ETH bounty amount..."></input> <br>
 <input id="PBTimeIntervalInput" placeholder="deadline..." ></input>
 <select id="PBTimeFrameSelect">
 <option value="1">seconds</option>
@@ -66,13 +68,15 @@
 <button onclick = "fPostPersonalBounty()">Post</button>
 
 
-<h3>Award Bounty Directly</h3>
-<input id="ABHunterInput" placeholder="bounty hunter..."></input> <br>
-<input id="ABNameInput" placeholder="bounty name..."></input> <br>
-<input id="ABDescriptionInput" placeholder="description..."></input> <br>
-<input id="ABAmountInput" placeholder="bounty amount..."></input> <br>
+<h3>Award Personal Bounty</h3>
+<input id="APHunterInput" placeholder="bounty hunter..."></input> <br>
+<input id="APNameInput" placeholder="bounty name..."></input> <br>
+<input id="APDescriptionInput" placeholder="description..."></input> <br>
+<input id="APAmountInput" placeholder="bounty amount..."></input> <br>
+<input id="APEthAmountInput" placeholder="ETH bounty amount..."></input> <br>
+
 <br>
-<button onclick = "award()">Award</button>
+<button onclick = "fAwardPersonalBounty()">Award</button>
 
 
 <hr>
@@ -87,7 +91,8 @@
     <th>Poster</th>
     <th>Name</th>
     <th>Description</th>
-    <th>Amount</th>
+    <th>DEV-Reward</th>
+    <th>ETH-Reward</th>
     <th>Deadline</th>
     <th>Submission</th>
     <th>Submit</th>
@@ -101,7 +106,8 @@
     <th>Poster</th>
     <th>Name</th>
     <th>Description</th>
-    <th>Amount</th>
+    <th>DEV-Reward</th>
+    <th>ETH-Reward</th>
     <th>Deadline</th>
     <th>Submission</th>
     <th>Submit</th>
@@ -115,7 +121,8 @@
     <th>Bounty-Name</th>
     <th>Poster</th>
     <th>Submission</th>
-    <th>Reward</th>
+    <th>DEV-Reward</th>
+    <th>ETH-Reward</th>
     <th>Deadline</th>
     <th>Revision</th>
     <th>Revise</th>
@@ -131,7 +138,8 @@
   <thead>
     <th>Bounty-Name</th>
     <th>Poster</th>
-    <th>Reward</th>
+    <th>DEV-Reward</th>
+    <th>ETH-Reward</th>
     <th>Date</th>
   </thead>
   <tbody id="HRTable">
@@ -149,11 +157,14 @@
 <label id="MDescriptionLabel">Description:</label> <br>
 <label id="MHunterLabel">Hunter:</label> <br>
 <label id="MAmountLabel">Amount:</label> <br>
+<label id="MEthAmountLabel">Eth Amount:</label> <br>
 <label id="MAvailableLabel">Num Bounties:</label> <br>
 <label id="MDeadlineLabel">Deadline:</label> <br>
 <input placeholder="amount..." id="CAmountInput"></input><button onclick="fContribute()">Contribute</button> <br><br><br>
 
-
+<h3> Award Bounty</h3>
+<input placeholder="bounty hunter..." id="AOHunterInput"></input><br>
+<button onclick = "fAwardOpenBounty()">Award</button>
 
 <!-- <select id="MSSubmissionSelect" onchange="updateSubmissionManager()"></select><br>
 <label id="MSHunterLabel">Hunter:</label> <br>
@@ -197,7 +208,8 @@
 <table>
   <thead>
     <th>Bounty-Name</th>
-    <th>Rewarded</th>
+    <th>DEV-Rewarded</th>
+    <th>ETH-Rewarded</th>
     <th>Status</th>
     <th>Date</th>
 

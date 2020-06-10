@@ -3,6 +3,9 @@ let DBalanceLabel
 let DApprovedLabel
 let DApproveAmountInput
 
+let FeeLabel
+let WaiverLabel
+
 let OBNameInput
 let OBDescriptionInput
 let OBAvailableInput
@@ -22,6 +25,7 @@ let ABHunterInput
 let ABNameInput
 let ABDescriptionInput
 let ABAmountInput
+let ABEthAmountInput
 
 let MBountySelect
 let MCreatorLabel
@@ -29,10 +33,13 @@ let MNameLabel
 let MDescriptionLabel
 let MHunterLabel
 let MAmountLabel
+let MEthAmountLabel
 let MAvailableLabel
 let MDeadlineLabel
 
 let CAmountInput
+
+let AOHunter
 
 let MSSubmissionSelect
 let MSHunterLabel
@@ -69,6 +76,8 @@ async function populateFrontend(){
   console.log("Populate Frontend")
   getElements()
   await populateBalance()
+  await populateFee()
+  if(ubounties.length==0){return}
   await populatePosterManager()
   await populateHunterManager()
   await populateManagerManager()
@@ -79,6 +88,9 @@ async function getElements(){
   DBalanceLabel = document.getElementById("DBalanceLabel")
   DApprovedLabel = document.getElementById("DApprovedLabel")
   DApproveAmountInput = document.getElementById("DApproveAmountInput")
+
+  FeeLabel = document.getElementById("FeeLabel")
+  WaiverLabel = document.getElementById("WaiverLabel")
 
   OBNameInput = document.getElementById("OBNameInput")
   OBDescriptionInput = document.getElementById("OBDescriptionInput")
@@ -99,6 +111,7 @@ async function getElements(){
   ABNameInput = document.getElementById("ABNameInput")
   ABDescriptionInput = document.getElementById("ABDescriptionInput")
   ABAmountInput = document.getElementById("ABAmountInput")
+  ABEthAmountInput = document.getElementById("ABEthAmountInput")
 
   MBountySelect = document.getElementById("MBountySelect")
   MCreatorLabel = document.getElementById("MCreatorLabel")
@@ -106,10 +119,13 @@ async function getElements(){
   MDescriptionLabel = document.getElementById("MDescriptionLabel")
   MHunterLabel = document.getElementById("MHunterLabel")
   MAmountLabel = document.getElementById("MAmountLabel")
+  MEthAmountLabel = document.getElementById("MEthAmountLabel")
   MAvailableLabel = document.getElementById("MAvailableLabel")
   MDeadlineLabel = document.getElementById("MDeadlineLabel")
 
   CAmountInput = document.getElementById("CAmountInput")
+
+  AOHunterInput = document.getElementById("AOHunterInput")
 
   MSSubmissionSelect = document.getElementById("MSSubmissionSelect")
   MSHunterLabel = document.getElementById("MSHunterLabel")
@@ -127,11 +143,14 @@ async function populateBalance(){
   DApprovedLabel.innerHTML = "Approved Devcash: " + await getApprovedBalance()
 }
 
-
-
+async function populateFee(){
+  console.log("Populate Fee")
+  FeeLabel.innerHTML = "Fee: " + await getFee()
+  WaiverLabel.innerHTML = "Waiver: " + await getWaiver()
+}
 
 async function fApproveDevcash(){
-  let amount = DApproveAmountInput.value;
+  let amount = (DApproveAmountInput.value).toString();
   approveDevcash(amount)
 }
 
@@ -140,8 +159,9 @@ async function fPostOpenBounty(){
   let description = OBDescriptionInput.value
   let available = OBAvailableInput.value
   let amount = OBAmountInput.value
+  let ethAmount = OBEthAmountInput.value
   //let deadline = OB
-  await postOpenBounty(name,description,available,amount,0)
+  await postOpenBounty(name,description,available,amount,ethAmount,0)
 }
 
 async function fPostPersonalBounty(){
@@ -150,7 +170,23 @@ async function fPostPersonalBounty(){
   let hunter = PBHunterInput.value
   let available = PBAvailableInput.value
   let amount = PBAmountInput.value
-  await postPersonalBounty(name,description,hunter,available,amount,0)
+  let ethAmount = PBEthAmountInput.value
+  await postPersonalBounty(name,description,hunter,available,amount,ethAmount,0)
+}
+
+async function fAwardOpenBounty(){
+  ubountyIndex = MBountySelect.value
+  hunter = AOHunterInput.value
+  await awardOpenBounty(ubountyIndex,hunter)
+}
+
+async function fAwardPersonalBounty(){
+  let name = ABNameInput.value
+  let description = ABDescriptionInput.value
+  let hunter = ABHunterInput.value
+  let amount = ABAmountInput.value
+  let ethAmount = ABEthAmountInput.value
+  await awardPersonalBounty(name,description,hunter,amount,ethAmount)
 }
 
 async function getAddressLink(displayText, address){
@@ -165,6 +201,6 @@ async function getAddressLink(displayText, address){
   } else{
     link.href = "https://" + network + ".etherscan.io/address/" + address
   }
-  
+
   return(link)
 }
