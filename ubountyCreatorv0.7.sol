@@ -1,6 +1,6 @@
 pragma solidity ^0.5.11;
 
-//Contract deployed on ropsten: 0xeA67764DD6Dc2B4ED82d6c0B2a79115B6F1a5A92
+//Contract deployed on ropsten: 0x4572cd41D0ea7c69bD8A3A7C213F04eD83BB4976
 //Test Cash contract: 0x0f54093364b396461AAdf85C015Db597AAb56203
 
 contract ERC20Basic {
@@ -119,6 +119,7 @@ contract ubountyCreator{
         uint amount,
         uint48 deadline
         ) public payable{
+            require(msg.value>=fee||satisfiesWaiver(msg.sender));
 
             uint _fee;
             if(satisfiesWaiver(msg.sender)){
@@ -171,6 +172,7 @@ contract ubountyCreator{
         uint amount,
         uint48 deadline
         ) public payable{
+            require(msg.value>=fee||satisfiesWaiver(msg.sender));
 
             uint _fee;
             if(satisfiesWaiver(msg.sender)){
