@@ -189,6 +189,12 @@ async function fAwardPersonalBounty(){
   await awardPersonalBounty(name,description,hunter,amount,ethAmount)
 }
 
+async function fContribute(){
+  let uI = MBountySelect.value
+  let amount = CAmountInput.value
+  await contribute(uI,amount)
+}
+
 async function getAddressLink(displayText, address){
   let link = document.createElement("a")
   link.innerHTML = displayText

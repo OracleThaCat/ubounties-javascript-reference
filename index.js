@@ -1,15 +1,12 @@
 //TODO:
 //make sure deadlines working properly
-//gather all event logs
-//update statuses
 //refactor code, make neater, make consistent
-//make submissions update when you select new bounty
 //show bounty info all together in table
-//add award open bounty
-//fix eth amount in open bounty
-//add eth amount to bounty
 //add feedback text
 //add reclaim
+//add bounty activity
+//add submissions and revisions to submission status
+//show all bounties
 
 const ubcABI = [
 	{
@@ -1532,7 +1529,11 @@ async function getRevision(uI,sI,rI) {
 // }
 
 async function contribute(uI,amount){
-	let bcAddress = await getBountyChest(uI)
+	let bcAddress = await getBountyChest(ubounties[uI].bountyChestIndex)
 	amount = ethers.utils.parseUnits(amount,decimals)
+	console.log(uI)
+	console.log(amount)
+	console.log(bcAddress)
+
 	devcash.transfer(bcAddress,amount)
 }
