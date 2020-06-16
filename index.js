@@ -1009,7 +1009,7 @@ const ubcABI = [
 		"type": "function"
 	}
 ]
-const ubcAddress = "0x4572cd41D0ea7c69bD8A3A7C213F04eD83BB4976"//'0xB02C37e7036692dC8bbB99f58FBA034b2D112236';
+const ubcAddress = "0x73aa31Cd548AC14713F778f454348d90564e2dE1"//'0xcf4d3b217ff1f8f03b92e5402d85f854a3c2313d';
 let ubc // Universal Bounty Creator Contract
 let provider
 let signer
@@ -1332,7 +1332,7 @@ const devcashABI = [
 		"type": "function"
 	}
 ]
-const devcashAddress = "0x0f54093364b396461AAdf85C015Db597AAb56203"//"0x0fca8Fdb0FB115A33BAadEc6e7A141FFC1bC7d5a"
+const devcashAddress = "0x0fca8Fdb0FB115A33BAadEc6e7A141FFC1bC7d5a"//"0x0f54093364b396461AAdf85C015Db597AAb56203"//
 let devcash
 let decimals
 let symbol

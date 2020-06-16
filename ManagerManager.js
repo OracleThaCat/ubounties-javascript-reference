@@ -1,5 +1,6 @@
 async function populateManagerManager(){
   console.log("populate Manager Manager")
+  if(MBountySelect.length==0){return}
 
   await populateBountyInfo()
   await populateSubmissionsTable()

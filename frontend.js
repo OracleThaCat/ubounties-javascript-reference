@@ -161,7 +161,11 @@ async function fPostOpenBounty(){
   let available = OBAvailableInput.value
   let amount = OBAmountInput.value
   let ethAmount = OBEthAmountInput.value
-  let deadline = parseInt((Date.now()/1000 + OBTimeIntervalInput.value*OBTimeFrameSelect.value))
+  if(OBTimeIntervalInput.value == 0){
+    deadline = 0
+  } else{
+    deadline = parseInt((Date.now()/1000 + OBTimeIntervalInput.value*OBTimeFrameSelect.value))
+  }
   //let deadline = OB
   await postOpenBounty(name,description,available,amount,ethAmount,deadline)
 }
@@ -173,7 +177,14 @@ async function fPostPersonalBounty(){
   let available = PBAvailableInput.value
   let amount = PBAmountInput.value
   let ethAmount = PBEthAmountInput.value
-  let deadline = parseInt((Date.now()/1000 + PBTimeIntervalInput.value*PBTimeFrameSelect.value))
+  let deadline
+  if(PBTimeIntervalInput.value == 0){
+    deadline = 0
+  } else{
+    deadline = parseInt((Date.now()/1000 + PBTimeIntervalInput.value*PBTimeFrameSelect.value))
+  }
+
+  console.log(deadline)
   await postPersonalBounty(name,description,hunter,available,amount,ethAmount,deadline)
 }
 
