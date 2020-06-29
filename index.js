@@ -1337,7 +1337,6 @@ let devcash
 let decimals
 let symbol
 
-
 async function getETHBalance(){
 	let balance = await signer.getBalance()
 	balance = ethers.utils.formatEther(balance)
@@ -1345,14 +1344,15 @@ async function getETHBalance(){
 	balance += " ETH"
 	return(balance)
 }
-async function getDevcashBalance(){
 
+async function getDevcashBalance(){
   let balance = await devcash.balanceOf(signer._address)
 	balance = ethers.utils.formatUnits(balance,decimals)
 	balance = ethers.utils.commify(balance)
 	balance += " " + symbol
 	return(balance)
 }
+
 async function getApprovedBalance(){
 	let approved = await devcash.allowance(signer._address, ubcAddress)
 	approved = ethers.utils.formatUnits(approved,decimals)
@@ -1380,6 +1380,7 @@ async function getWaiver(){
 	waiver += " " + symbol
 	return(waiver)
 }
+
 async function getUbountiesInfo(){
 	ubountiesInfo = new Array()
 
@@ -1413,11 +1414,9 @@ async function getUbountiesInfo(){
 
 		ubounty.amount = ethers.utils.formatUnits(bountyAmount,decimals)
 
-
 		let ethBountyAmount = ethers.utils.formatEther(weiBountyAmount)
 		ubounty.ethAmount = ethBountyAmount
 		ubountiesInfo.push(ubounty)
-
 	}
 	return(ubountiesInfo)
 }
@@ -1425,12 +1424,15 @@ async function getUbountiesInfo(){
 async function numBountyChests(){
 	return(await ubc.numBC())
 }
+
 async function getBountyChest(bcIndex){
 	return(await ubc.bCList(bcIndex))
 }
+
 async function numUsers() {
 	return(await ubc.numUsers())
 }
+
 async function getUsers() {
 	let num = await numUsers()
 	let users = new Array()
@@ -1459,6 +1461,7 @@ async function postOpenBounty(name,description,available,amount,ethAmount,deadli
 	}
 	await ubc.postOpenBounty(name,description,available,amount,deadline,overrides)
 }
+
 //n = Name
 //d = description
 //hu = hunter
@@ -1479,6 +1482,7 @@ async function postPersonalBounty(name,description,hunter,available,amount,ethAm
 	}
 	await ubc.postPersonalBounty(name,description,hunter,available,amount,deadline,overrides)
 }
+
 //uI = ubountyIndex
 async function awardOpenBounty(uI,hunter){
 	await ubc.awardOpenBounty(uI,hunter)
@@ -1505,18 +1509,23 @@ async function revise(uI,sI,rS) {
 async function approve(uI,sI,f) {
 	await ubc.approve(uI,sI,f)
 }
+
 async function reject(uI,sI,f) {
 	await ubc.reject(uI,sI,f)
 }
+
 async function requestRevision(uI,sI,f) {
 	await ubc.requestRevision(uI,sI,f)
 }
+
 async function bountyAmount(uI){
  return await ubc.bountyAmount(uI)
 }
+
 async function reclaim(uI) {
 	await ubc.reclaim(uI)
 }
+
 async function createBountyChest(){
 	await ubc.createBountyChest()
 }
