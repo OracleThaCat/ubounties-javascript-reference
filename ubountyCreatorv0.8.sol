@@ -171,7 +171,7 @@ contract ubountyCreator{
         string memory name,
         string memory description,
         address payable hunter,
-        uint available,
+        uint8 available,
         uint amount,
         uint48 deadline
         ) public payable{
@@ -209,7 +209,7 @@ contract ubountyCreator{
 
             ubounties[numUbounties].creatorIndex = users[msg.sender];
             ubounties[numUbounties].hunterIndex = users[hunter];
-            ubounties[numUbounties].available = 1;
+            ubounties[numUbounties].available = available;
             ubounties[numUbounties].name = name;
             ubounties[numUbounties].description = description;
             ubounties[numUbounties].bountyChestIndex = bountyChests[bCAddress];
