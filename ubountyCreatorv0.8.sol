@@ -1,6 +1,6 @@
 pragma solidity ^0.5.11;
 
-//Contract deployed on ropsten: 0xb760dd7a52369268571030d8c2d263446cf3a425
+//Contract deployed on ropsten: 0x0ab27d1add579E4C71a341a9579244385066bBC1
 //Test Cash contract: 0x0f54093364b396461AAdf85C015Db597AAb56203
 
 //Mainnet: 0x73aa31Cd548AC14713F778f454348d90564e2dE1
