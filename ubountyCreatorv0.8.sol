@@ -344,6 +344,17 @@ contract ubountyCreator{
         }
     }
 
+    function contribute(uint ubountyIndex, uint amount) public{
+        require(ubounties[ubountyIndex].available>0,"This bounty is inactive");
+        address bCAddress = bCList[ubounties[ubountyIndex].bountyChestIndex];
+        ERC20(devcash).transferFrom(msg.sender,bCAddress,amount);
+    }
+
+    function contributeWei(uint ubountyIndex) public payable{
+        require(ubounties[ubountyIndex].available>0,"This bounty is inactive");
+        ubounties[ubountyIndex].weiAmount += msg.value;
+    }
+
     function reclaim(uint ubountyIndex) public {
         require(users[msg.sender]==ubounties[ubountyIndex].creatorIndex,"You are not the bounty creator");
         require(ubounties[ubountyIndex].deadline!=2**48-1,"This bounty was created without a deadline, and is not reclaimable");
@@ -370,6 +381,14 @@ contract ubountyCreator{
     }
 
     function reclaimable(uint ubountyIndex) public view returns(bool){
+        if(ubounties[ubountyIndex].deadline!=2**48-1){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function reclaimableNow(uint ubountyIndex) public view returns(bool){
         if(now>ubounties[ubountyIndex].deadline){
             return true;
         } else {
