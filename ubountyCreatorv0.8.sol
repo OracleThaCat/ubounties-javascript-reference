@@ -6,18 +6,11 @@ pragma solidity ^0.5.11;
 //Mainnet: 0x73aa31Cd548AC14713F778f454348d90564e2dE1
 //Devcash: 0x0fca8Fdb0FB115A33BAadEc6e7A141FFC1bC7d5a
 
-contract ERC20Basic {
-  function totalSupply() public view returns (uint256);
-  function balanceOf(address who) public view returns (uint256);
-  function transfer(address to, uint256 value) public returns (bool);
-  event Transfer(address indexed from, address indexed to, uint256 value);
-}
 
-contract ERC20 is ERC20Basic {
-  function allowance(address owner, address spender) public view returns (uint256);
-  function transferFrom(address from, address to, uint256 value) public returns (bool);
-  function approve(address spender, uint256 value) public returns (bool);
-  event Approval(address indexed owner, address indexed spender, uint256 value);
+contract ERC20{
+    function balanceOf(address who) public view returns (uint256);
+    function transfer(address to, uint256 value) public returns (bool);
+    function transferFrom(address from, address to, uint256 value) public returns (bool);
 }
 
 contract ERC20Approve {
@@ -122,45 +115,22 @@ contract ubountyCreator{
         uint amount,
         uint48 deadline
         ) public payable{
-            require(msg.value>=fee||satisfiesWaiver(msg.sender));
+            require(msg.value>=fee||satisfiesWaiver(msg.sender), "ETH fee and DEV waiver not met");
 
-            uint _fee;
-            if(satisfiesWaiver(msg.sender)){
-                _fee=0;
-            } else{
-                _fee = fee;
-            }
+            uint _fee = getFee(msg.sender);
 
-            if (users[msg.sender]==0){
-                users[msg.sender] = uint32(userList.length);
-                userList.push(msg.sender);
-            }
+            addUser(msg.sender);
 
-            address bCAddress;
-            if (freeBC.length>0){
-                bCAddress = bCList[freeBC[freeBC.length-1]];
-                freeBC.length--;
-            } else{
-                bountyChest C = new bountyChest();
-                bCAddress = address(C);
-                bountyChests[bCAddress] = uint32(bCList.length);
-                bCList.push(bCAddress);
-            }
+            address bCAddress = getBountyChest();
 
             uint weiAmount = msg.value-_fee;
 
-            ubounties[numUbounties].creatorIndex = users[msg.sender];
-            ubounties[numUbounties].available = available;
-            ubounties[numUbounties].name = name;
-            ubounties[numUbounties].description = description;
-            ubounties[numUbounties].bountyChestIndex = bountyChests[bCAddress];
-            ubounties[numUbounties].weiAmount = weiAmount;
-
             if(deadline==0){
-                ubounties[numUbounties].deadline = 2**48-1;
-            } else {
-               ubounties[numUbounties].deadline = deadline;
+                deadline = 2**48-1;
             }
+
+            setUbounty(users[msg.sender], 0, available, name, description, bountyChests[bCAddress], weiAmount, deadline);
+
 
             collector.transfer(_fee);
             ERC20(devcash).transferFrom(msg.sender,bCAddress,amount);
@@ -175,50 +145,23 @@ contract ubountyCreator{
         uint amount,
         uint48 deadline
         ) public payable{
-            require(msg.value>=fee||satisfiesWaiver(msg.sender));
+            require(msg.value>=fee||satisfiesWaiver(msg.sender), "ETH fee and DEV waiver not met");
 
-            uint _fee;
-            if(satisfiesWaiver(msg.sender)){
-                _fee=0;
-            } else{
-                _fee = fee;
-            }
+            uint _fee = getFee(msg.sender);
 
-            if (users[msg.sender]==0){
-                users[msg.sender] = uint32(userList.length);
-                userList.push(msg.sender);
-            }
+            addUser(msg.sender);
 
-            if(users[hunter]==0){
-                users[hunter] = uint32(userList.length);
-                userList.push(hunter);
-            }
+            addUser(hunter);
 
-            address bCAddress;
-            if (freeBC.length>0){
-                bCAddress = bCList[freeBC[freeBC.length-1]];
-                freeBC.length--;
-            } else{
-                bountyChest C = new bountyChest();
-                bCAddress = address(C);
-                bountyChests[bCAddress] = uint32(bCList.length);
-                bCList.push(bCAddress);
-            }
+            address bCAddress = getBountyChest();
 
             uint weiAmount = msg.value-_fee;
 
-            ubounties[numUbounties].creatorIndex = users[msg.sender];
-            ubounties[numUbounties].hunterIndex = users[hunter];
-            ubounties[numUbounties].available = available;
-            ubounties[numUbounties].name = name;
-            ubounties[numUbounties].description = description;
-            ubounties[numUbounties].bountyChestIndex = bountyChests[bCAddress];
-            ubounties[numUbounties].weiAmount = weiAmount;
             if(deadline==0){
-                ubounties[numUbounties].deadline = 2**48-1;
-            } else {
-               ubounties[numUbounties].deadline = deadline;
+                deadline = 2**48-1;
             }
+
+            setUbounty(users[msg.sender], users[hunter], available, name, description, bountyChests[bCAddress], weiAmount, deadline);
 
             collector.transfer(_fee);
             ERC20(devcash).transferFrom(msg.sender,bCAddress,amount);
@@ -246,27 +189,72 @@ contract ubountyCreator{
     }
 
     function awardPersonalBounty(string memory name, string memory description, address payable hunter, uint tokenAmount) public payable {
-        if (users[msg.sender]==0){
-                users[msg.sender] = uint32(userList.length);
-                userList.push(msg.sender);
-            }
+        require(msg.value>=fee||satisfiesWaiver(msg.sender), "ETH fee and DEV waiver not met");
 
-            if(users[hunter]==0){
-                users[hunter] = uint32(userList.length);
-                userList.push(hunter);
-            }
+        uint _fee = getFee(msg.sender);
 
-        ubounties[numUbounties].creatorIndex = users[msg.sender];
-        ubounties[numUbounties].hunterIndex = users[hunter];
-        ubounties[numUbounties].name = name;
-        ubounties[numUbounties].description = description;
+        addUser(msg.sender);
+        addUser(hunter);
 
-        uint weiAmount = msg.value;
+        setUbounty(users[msg.sender], users[hunter], 0, name, description, 0, 0, 0);
+
+        uint weiAmount = msg.value-_fee;
 
         hunter.transfer(weiAmount);
         ERC20(devcash).transferFrom(msg.sender,hunter,tokenAmount);
+
+        collector.transfer(_fee);
         emit rewarded(numUbounties,0,hunter,tokenAmount,weiAmount);
         emit completed(numUbounties++);
+    }
+
+    function getFee(address Poster) public view returns(uint _fee) {
+            if(satisfiesWaiver(Poster)){
+                _fee=0;
+            } else{
+                _fee = fee;
+            }
+            return(_fee);
+    }
+
+    function addUser(address payable user) public {
+        if (users[user]==0){
+            users[user] = uint32(userList.length);
+            userList.push(user);
+        }
+    }
+
+    function getBountyChest() internal returns(address bCAddress){
+        if (freeBC.length>0){
+                bCAddress = bCList[freeBC[freeBC.length-1]];
+                freeBC.length--;
+            } else{
+                bountyChest C = new bountyChest();
+                bCAddress = address(C);
+                bountyChests[bCAddress] = uint32(bCList.length);
+                bCList.push(bCAddress);
+            }
+        return(bCAddress);
+    }
+
+    function setUbounty(
+        uint32 creatorIndex,
+        uint32 hunterIndex,
+        uint8 available,
+        string memory name,
+        string memory description,
+        uint32 bountyChestIndex,
+        uint weiAmount,
+        uint48 deadline
+        ) internal {
+            ubounties[numUbounties].creatorIndex = creatorIndex;
+            ubounties[numUbounties].hunterIndex = hunterIndex;
+            ubounties[numUbounties].available = available;
+            ubounties[numUbounties].name = name;
+            ubounties[numUbounties].description = description;
+            ubounties[numUbounties].bountyChestIndex = bountyChestIndex;
+            ubounties[numUbounties].weiAmount = weiAmount;
+            ubounties[numUbounties].deadline = deadline;
     }
 
     function submit(uint ubountyIndex, string memory submissionString) public {
@@ -395,7 +383,6 @@ contract ubountyCreator{
             return false;
         }
     }
-
 
     function bountyAmount(uint ubountyIndex) public view returns(uint){
         return(ERC20(devcash).balanceOf(bCList[ubounties[ubountyIndex].bountyChestIndex]));
