@@ -1,6 +1,6 @@
 pragma solidity ^0.6.10;
 
-//Contract deployed on ropsten: 0x0ab27d1add579E4C71a341a9579244385066bBC1
+//Contract deployed on ropsten: 0xb4b333123caf6b29da37e7973aceed4e82d8206b
 //Test Cash contract: 0x0f54093364b396461AAdf85C015Db597AAb56203
 
 //Mainnet: 0x73aa31Cd548AC14713F778f454348d90564e2dE1
@@ -20,7 +20,7 @@ abstract contract ERC20Approve {
 contract bountyChest{
     address payable creator;
     constructor () public {
-        ERC20Approve(0x0f54093364b396461AAdf85C015Db597AAb56203).approve(msg.sender,2**256-1);
+        ERC20Approve(0x0fca8Fdb0FB115A33BAadEc6e7A141FFC1bC7d5a).approve(msg.sender,2**256-1);
         creator = msg.sender;
     }
     receive() external payable{
@@ -54,7 +54,7 @@ contract ubountyCreator{
     event feeChange(uint oldFee, uint newFee);
     event waiverChange(uint oldWaiver, uint newWaiver);
 
-    address public devcash = 0x0f54093364b396461AAdf85C015Db597AAb56203;
+    address public devcash = 0x0fca8Fdb0FB115A33BAadEc6e7A141FFC1bC7d5a;
     address public admin;
     address payable public collector = 0xB1F445F64CDDe81d58c26ab1C340FE2a82F55A4C;
 
