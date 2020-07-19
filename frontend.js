@@ -220,11 +220,8 @@ async function getAddressLink(displayText, address){
   let network = (await signer.provider.getNetwork()).name
 
 
-  if (network=="homestead"){
-    link.href ="https://etherscan.io/address/" + address
-  } else{
-    link.href = "https://" + network + ".etherscan.io/address/" + address
-  }
+    link.href ="https://mumbai-explorer.matic.today/address/" + address
+
 
   return(link)
 }
