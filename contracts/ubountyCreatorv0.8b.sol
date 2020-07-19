@@ -3,7 +3,7 @@ pragma solidity ^0.6.10;
 //Contract deployed on ropsten: 0xb4b333123caf6b29da37e7973aceed4e82d8206b
 //Test Cash contract: 0x0f54093364b396461AAdf85C015Db597AAb56203
 
-//Mainnet: 0x73aa31Cd548AC14713F778f454348d90564e2dE1
+//Mainnet contract: 0x73aa31Cd548AC14713F778f454348d90564e2dE1
 //Devcash: 0x0fca8Fdb0FB115A33BAadEc6e7A141FFC1bC7d5a
 
 
