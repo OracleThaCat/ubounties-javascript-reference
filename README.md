@@ -6,8 +6,7 @@ You will find complete examples of how to interact with the uBounties contracts 
 
 See the various branches to for examples using different versions of the uBounties contracts. 
 
-
-To run the app, serve index.html: 
+To run the app, serve index.html
 
 ``` bash
 cd ubounties-javascript-reference
