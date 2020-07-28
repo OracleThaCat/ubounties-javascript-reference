@@ -9,7 +9,7 @@ See the various branches to for examples using different versions of the uBounti
 
 To run the app, serve index.html: 
 
-```
+``` bash
 cd ubounties-javascript-reference
 http-server
 ```
