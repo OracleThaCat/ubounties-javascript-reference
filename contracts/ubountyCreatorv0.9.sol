@@ -39,10 +39,27 @@ contract UbountyCreator is ReentrancyGuard, Pausable, AccessControl {
     uint256 public waiver;
     uint256 public minDeadlinePeriod = 1 hours;
     
+    // Multi-evaluator structures
+    struct Evaluation {
+        bool hasEvaluated;
+        bool approved;
+        string feedback;
+    }
+    
+    struct EvaluatorConfig {
+        uint8 requiredApprovals;
+        uint8 numEvaluators;
+        mapping(address => bool) isEvaluator;
+        address[] evaluatorList;
+    }
+
     struct Submission {
         uint32 submitterIndex;
         string submissionString;
-        bool approved;
+        bool finalApproved;
+        uint8 numApprovals;
+        uint8 numRejections;
+        mapping(address => Evaluation) evaluations;
         mapping(uint256 => string) revisions;
         uint8 numRevisions;
     }
@@ -57,7 +74,146 @@ contract UbountyCreator is ReentrancyGuard, Pausable, AccessControl {
         string name;
         string description;
         mapping(uint256 => Submission) submissions;
+        EvaluatorConfig evaluators;
         bool exists;
+    }
+    
+    // Events for evaluation system
+    event EvaluatorAdded(uint256 indexed ubountyIndex, address evaluator);
+    event EvaluatorRemoved(uint256 indexed ubountyIndex, address evaluator);
+    event RequiredApprovalsChanged(uint256 indexed ubountyIndex, uint8 newRequired);
+    event SubmissionEvaluated(uint256 indexed ubountyIndex, uint256 submissionIndex, address evaluator, bool approved, string feedback);
+    
+    // Evaluator management functions
+    function addEvaluator(
+        uint256 ubountyIndex, 
+        address evaluator
+    ) external whenNotPaused bountyExists(ubountyIndex) onlyBountyCreator(ubountyIndex) {
+        require(evaluator != address(0), "Invalid evaluator address");
+        EvaluatorConfig storage config = ubounties[ubountyIndex].evaluators;
+        require(!config.isEvaluator[evaluator], "Already an evaluator");
+        require(config.numEvaluators < 255, "Max evaluators reached");
+        
+        config.isEvaluator[evaluator] = true;
+        config.evaluatorList.push(evaluator);
+        config.numEvaluators++;
+        
+        // If this is the first evaluator, set required approvals to 1
+        if (config.requiredApprovals == 0) {
+            config.requiredApprovals = 1;
+        }
+        
+        emit EvaluatorAdded(ubountyIndex, evaluator);
+    }
+    
+    function removeEvaluator(
+        uint256 ubountyIndex, 
+        address evaluator
+    ) external whenNotPaused bountyExists(ubountyIndex) onlyBountyCreator(ubountyIndex) {
+        EvaluatorConfig storage config = ubounties[ubountyIndex].evaluators;
+        require(config.isEvaluator[evaluator], "Not an evaluator");
+        require(config.numEvaluators > config.requiredApprovals, "Cannot have fewer evaluators than required approvals");
+        
+        config.isEvaluator[evaluator] = false;
+        config.numEvaluators--;
+        
+        // Remove from list
+        for (uint i = 0; i < config.evaluatorList.length; i++) {
+            if (config.evaluatorList[i] == evaluator) {
+                config.evaluatorList[i] = config.evaluatorList[config.evaluatorList.length - 1];
+                config.evaluatorList.pop();
+                break;
+            }
+        }
+        
+        emit EvaluatorRemoved(ubountyIndex, evaluator);
+    }
+    
+    function setRequiredApprovals(
+        uint256 ubountyIndex, 
+        uint8 required
+    ) external whenNotPaused bountyExists(ubountyIndex) onlyBountyCreator(ubountyIndex) {
+        EvaluatorConfig storage config = ubounties[ubountyIndex].evaluators;
+        require(required > 0, "Must require at least one approval");
+        require(required <= config.numEvaluators, "Cannot require more approvals than evaluators");
+        
+        config.requiredApprovals = required;
+        emit RequiredApprovalsChanged(ubountyIndex, required);
+    }
+    
+    // Modified evaluation function
+    function evaluate(
+        uint256 ubountyIndex,
+        uint256 submissionIndex,
+        bool approved,
+        string calldata feedback
+    ) external whenNotPaused nonReentrant bountyExists(ubountyIndex) bountyActive(ubountyIndex) {
+        Ubounty storage bounty = ubounties[ubountyIndex];
+        require(bounty.evaluators.isEvaluator[msg.sender], "Not an evaluator");
+        require(submissionIndex < bounty.numSubmissions, "Invalid submission");
+        
+        Submission storage submission = bounty.submissions[submissionIndex];
+        require(!submission.finalApproved, "Already approved");
+        require(!submission.evaluations[msg.sender].hasEvaluated, "Already evaluated");
+        
+        // Record evaluation
+        submission.evaluations[msg.sender] = Evaluation({
+            hasEvaluated: true,
+            approved: approved,
+            feedback: feedback
+        });
+        
+        if (approved) {
+            submission.numApprovals++;
+            // Check if we've reached required approvals
+            if (submission.numApprovals >= bounty.evaluators.requiredApprovals) {
+                submission.finalApproved = true;
+                // Process reward
+                _processReward(ubountyIndex, submissionIndex, userList[submission.submitterIndex]);
+            }
+        } else {
+            submission.numRejections++;
+        }
+        
+        emit SubmissionEvaluated(ubountyIndex, submissionIndex, msg.sender, approved, feedback);
+    }
+    
+    // View functions for evaluation status
+    function getEvaluationStatus(
+        uint256 ubountyIndex,
+        uint256 submissionIndex
+    ) external view returns (
+        uint8 numApprovals,
+        uint8 numRejections,
+        uint8 requiredApprovals,
+        bool finalApproved
+    ) {
+        Submission storage submission = ubounties[ubountyIndex].submissions[submissionIndex];
+        return (
+            submission.numApprovals,
+            submission.numRejections,
+            ubounties[ubountyIndex].evaluators.requiredApprovals,
+            submission.finalApproved
+        );
+    }
+    
+    function getEvaluatorFeedback(
+        uint256 ubountyIndex,
+        uint256 submissionIndex,
+        address evaluator
+    ) external view returns (
+        bool hasEvaluated,
+        bool approved,
+        string memory feedback
+    ) {
+        Evaluation storage eval = ubounties[ubountyIndex].submissions[submissionIndex].evaluations[evaluator];
+        return (eval.hasEvaluated, eval.approved, eval.feedback);
+    }
+    
+    function getEvaluators(
+        uint256 ubountyIndex
+    ) external view returns (address[] memory) {
+        return ubounties[ubountyIndex].evaluators.evaluatorList;
     }
     
     mapping(uint256 => Ubounty) public ubounties;
