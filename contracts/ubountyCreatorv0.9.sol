@@ -894,6 +894,141 @@ contract UbountyCreator is ReentrancyGuard, Pausable, AccessControl {
         Ubounty storage bounty = ubounties[ubountyIndex];
         return bounty.deadline != type(uint48).max && block.timestamp > bounty.deadline;
     }
+
+   // New function to create a bounty with progressive rewards
+function postProgressiveBounty(
+    string calldata name,
+    string calldata description,
+    ProgressiveTierData[] calldata tierData,
+    uint48 deadline
+) external payable whenNotPaused nonReentrant {
+    require(tierData.length > 0 && tierData.length <= 5, "Invalid tier count");
+    require(bytes(name).length > 0, "Name required");
+    require(bytes(description).length > 0, "Description required");
     
-    // The End
+    uint256 totalTokenAmount;
+    uint256 totalWeiAmount;
+    
+    // Calculate total rewards including milestones and achievements
+    for (uint8 i = 0; i < tierData.length; i++) {
+        ProgressiveTierData calldata tier = tierData[i];
+        
+        // Base rewards
+        totalTokenAmount += tier.tokenAmount * tier.available;
+        totalWeiAmount += tier.weiAmount * tier.available;
+        
+        // Milestone rewards
+        for (uint8 j = 0; j < tier.milestones.length; j++) {
+            totalTokenAmount += tier.milestones[j].tokenAmount * tier.available;
+            totalWeiAmount += tier.milestones[j].weiAmount * tier.available;
+        }
+        
+        // Achievement bonuses
+        for (uint8 j = 0; j < tier.achievements.length; j++) {
+            totalTokenAmount += tier.achievements[j].bonusTokens * tier.available;
+            totalWeiAmount += tier.achievements[j].bonusWei * tier.available;
+        }
+    }
+    
+    require(msg.value >= totalWeiAmount + fee || satisfiesWaiver(msg.sender), "Insufficient ETH");
+
+    // Setup bounty
+    uint256 bountyIndex = numUbounties++;
+    Ubounty storage bounty = ubounties[bountyIndex];
+    _setupBasicBounty(bounty, name, description, deadline);
+    
+    // Setup tiers with milestones and achievements
+    for (uint8 i = 0; i < tierData.length; i++) {
+        _setupProgressiveTier(bounty, i, tierData[i]);
+    }
+    
+    // Handle payments and emit events
+    _handleBountyPayments(bountyIndex, totalTokenAmount, totalWeiAmount);
+}
+
+// Function to complete a milestone
+function completeMilestone(
+    uint256 ubountyIndex,
+    uint256 submissionIndex,
+    uint8 milestoneIndex
+) external whenNotPaused nonReentrant bountyExists(ubountyIndex) {
+    Ubounty storage bounty = ubounties[ubountyIndex];
+    require(bounty.evaluators.isEvaluator[msg.sender], "Not evaluator");
+    
+    Submission storage submission = bounty.submissions[submissionIndex];
+    require(submission.finalApproved, "Submission not approved");
+    require(!submission.completedMilestones[milestoneIndex], "Already completed");
+    
+    RewardTier storage tier = bounty.rewardTiers[submission.assignedTier];
+    Milestone storage milestone = tier.milestones[milestoneIndex];
+    require(!milestone.completed, "Milestone already completed");
+    require(milestoneIndex == submission.currentMilestone, "Wrong milestone");
+    
+    // Record evaluator approval
+    require(!milestone.evaluatorApprovals[msg.sender], "Already approved");
+    milestone.evaluatorApprovals[msg.sender] = true;
+    milestone.numApprovals++;
+    
+    // Check if milestone is completed
+    if (milestone.numApprovals >= bounty.evaluators.requiredApprovals) {
+        _completeMilestone(ubountyIndex, submissionIndex, milestoneIndex);
+    }
+}
+
+// Function to unlock achievements
+function unlockAchievement(
+    uint256 ubountyIndex,
+    uint256 submissionIndex,
+    uint8 achievementIndex
+) external whenNotPaused nonReentrant bountyExists(ubountyIndex) {
+    Ubounty storage bounty = ubounties[ubountyIndex];
+    require(bounty.evaluators.isEvaluator[msg.sender], "Not evaluator");
+    
+    Submission storage submission = bounty.submissions[submissionIndex];
+    require(submission.finalApproved, "Submission not approved");
+    require(!submission.unlockedAchievements[achievementIndex], "Already unlocked");
+    
+    RewardTier storage tier = bounty.rewardTiers[submission.assignedTier];
+    Achievement storage achievement = tier.achievements[achievementIndex];
+    require(!achievement.achieved, "Achievement already unlocked");
+    
+    // Process achievement bonus
+    submission.unlockedAchievements[achievementIndex] = true;
+    achievement.achieved = true;
+    achievement.achievedTime = block.timestamp;
+    
+    address payable hunter = userList[submission.submitterIndex];
+    _processAchievementReward(ubountyIndex, submissionIndex, achievementIndex, hunter);
+    
+    emit AchievementUnlocked(ubountyIndex, submissionIndex, achievementIndex, hunter);
+}
+
+// Internal function to process milestone completion
+function _completeMilestone(
+    uint256 ubountyIndex,
+    uint256 submissionIndex,
+    uint8 milestoneIndex
+) private {
+    Ubounty storage bounty = ubounties[ubountyIndex];
+    Submission storage submission = bounty.submissions[submissionIndex];
+    RewardTier storage tier = bounty.rewardTiers[submission.assignedTier];
+    Milestone storage milestone = tier.milestones[milestoneIndex];
+    
+    milestone.completed = true;
+    milestone.completedTime = block.timestamp;
+    submission.completedMilestones[milestoneIndex] = true;
+    submission.currentMilestone++;
+    
+    // Process milestone reward
+    address payable hunter = userList[submission.submitterIndex];
+    _processMilestoneReward(ubountyIndex, submissionIndex, milestoneIndex, hunter);
+    
+    emit MilestoneCompleted(ubountyIndex, submissionIndex, milestoneIndex, hunter);
+}
+
+// Events
+event MilestoneCompleted(uint256 indexed ubountyIndex, uint256 submissionIndex, uint8 milestoneIndex, address hunter);
+event AchievementUnlocked(uint256 indexed ubountyIndex, uint256 submissionIndex, uint8 achievementIndex, address hunter);
+event ProgressiveRewardPaid(uint256 indexed ubountyIndex, uint256 submissionIndex, address hunter, uint256 tokenAmount, uint256 weiAmount, string rewardType);
+    
 }
